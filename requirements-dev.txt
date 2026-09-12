@@ -1,0 +1,7 @@
+# Ferramentas de desenvolvimento. Inclui o requirements.txt de proposito:
+# instalar so este arquivo ja deixa o ambiente completo.
+
+-r requirements.txt
+
+pytest>=8.0
+ruff>=0.6

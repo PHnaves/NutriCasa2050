@@ -1,0 +1,46 @@
+# Tudo que nao precisa entrar na imagem. Imagem menor sobe mais rapido
+# e tem menos superficie de ataque.
+
+# ----- Controle de versao -----
+.git
+.gitignore
+.github
+
+# ----- Ambiente local -----
+.venv
+venv
+env
+.env
+.env.local
+
+# ----- Bancos (vem dos volumes, nunca da imagem) -----
+var/
+var-test/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# ----- Caches -----
+__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# ----- Documentacao (nao e necessaria para rodar) -----
+docs/
+*.md
+!README.md
+
+# ----- Editores e SO -----
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# ----- Docker -----
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -1,0 +1,51 @@
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# ----- Ambiente virtual -----
+.venv/
+venv/
+env/
+
+# ----- Variaveis de ambiente -----
+# O .env NUNCA vai para o repositorio. O .env.example VAI.
+.env
+.env.local
+.env.*.local
+
+# ----- Bancos SQLite -----
+# O banco de TESTE e sempre descartavel: nunca entra no repositorio.
+var-test/*.db
+var-test/*.db-*
+
+# O banco PRINCIPAL tambem fica fora, EXCETO o results.db que sera
+# publicado de proposito para o app na nuvem ler (ver docs/SQLITE.md).
+var/*.db
+var/*.db-*
+!var/results.db
+
+# ----- Ferramentas -----
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ----- Editores -----
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ----- Sistema operacional -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Saidas geradas -----
+outputs/
+figures/*.png

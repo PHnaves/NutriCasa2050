@@ -1,0 +1,6 @@
+# Dependencias necessarias para RODAR o app.
+# Ferramentas de teste/lint ficam no requirements-dev.txt.
+
+streamlit>=1.40
+pulp>=2.9
+pandas>=2.2

@@ -1,0 +1,74 @@
+# ---------------------------------------------------------------------------
+# NutriCasa 2050 — ambiente de desenvolvimento
+#
+# Dois servicos, dois bancos, dois volumes. O banco principal e o de teste
+# NUNCA se encostam: rodar os testes nao pode apagar nem sujar os
+# resultados da simulacao de verdade.
+#
+#   docker compose up                              -> app em localhost:8501
+#   docker compose --profile tools run --rm tests  -> lint + testes, e sai
+#   docker compose exec app bash                   -> terminal no container
+# ---------------------------------------------------------------------------
+
+services:
+
+  # ======================= APLICACAO (banco principal) ====================
+  app:
+    build:
+      context: .
+    container_name: nutricasa-app
+    ports:
+      - "8501:8501"
+    environment:
+      NUTRICASA2050_ENVIRONMENT: development
+      # Quatro barras = caminho absoluto. Tres seria caminho relativo.
+      NUTRICASA2050_DB_URL: "sqlite:////app/var/nutricasa2050.db"
+      NUTRICASA2050_TEST_DB_URL: "sqlite:////app/var-test/nutricasa2050_test.db"
+    volumes:
+      # Codigo montado de fora: editar no editor recarrega o app na hora,
+      # sem precisar reconstruir a imagem.
+      - ./src:/app/src
+      - ./app.py:/app/app.py
+      - ./data:/app/data
+      - ./tests:/app/tests
+      # Banco PRINCIPAL, em volume nomeado proprio.
+      - database:/app/var
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    restart: unless-stopped
+
+  # ========================= TESTES (banco de teste) ======================
+  # Servico de uso pontual: sobe, roda os testes e sai. Nao expoe porta e
+  # NAO monta o volume do banco principal — ele simplesmente nao alcanca.
+  tests:
+    build:
+      context: .
+    container_name: nutricasa2050-tests
+    environment:
+      NUTRICASA2050_ENVIRONMENT: test
+      # As DUAS variaveis apontam para o banco de TESTE de proposito:
+      # se algum codigo esquecer de usar a configuracao de teste, ele
+      # ainda assim nao consegue chegar no banco principal daqui.
+      NUTRICASA2050_DB_URL: "sqlite:////app/var-test/nutricasa2050_test.db"
+      NUTRICASA2050_TEST_DB_URL: "sqlite:////app/var-test/nutricasa2050_test.db"
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./data:/app/data
+      # Banco de TESTE, em volume nomeado separado.
+      - database-test:/app/var-test
+    command: sh -c "ruff check src tests && pytest"
+    profiles:
+      - tools
+
+volumes:
+  # Volumes nomeados e independentes. Apagar um nao mexe no outro:
+  #   docker volume rm nutricasa2050
+  database:
+    name: nutricasa2050
+  database-test:
+    name: nutricasa2050_test

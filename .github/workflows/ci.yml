@@ -1,0 +1,110 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancela execucoes antigas do mesmo branch: nao faz sentido testar um
+# commit que ja foi substituido.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Todo job do CI roda em ambiente de TESTE. O banco principal nao existe
+  # aqui e nao pode ser alcancado.
+  NUTRICASA2050_ENVIRONMENT: test
+  NUTRICASA2050_TEST_DB_URL: "sqlite:///var-test/nutricasa2050_test.db"
+
+jobs:
+
+  # ======================= 1. QUALIDADE E TESTES ==========================
+  quality:
+    name: Lint e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -e . --no-deps
+
+      - name: Estilo e erros de codigo
+        run: ruff check src tests
+
+      - name: Testes
+        run: pytest
+
+      # A FAZER, quando os modulos existirem:
+      #
+      # - name: Validar o catalogo de dados        (card S1-06)
+      #   run: python -m nutricasa2050.dados.validacao --validar
+      #
+      # - name: Cobertura                          (a partir do Sprint 2)
+      #   run: pytest --cov --cov-report=term-missing
+
+  # =========================== 2. CONTAINER ===============================
+  container:
+    name: Imagem Docker
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Construir a imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: nutricasa2050:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: O solver funciona DENTRO do container
+        # O passo mais valioso deste arquivo. O PuLP traz um binario proprio
+        # do CBC que as vezes nao funciona em imagem slim. Sem este teste,
+        # isso so seria descoberto no dia da apresentacao.
+        run: |
+          docker run --rm nutricasa2050:ci python - <<'PY'
+          import pulp
+          available = pulp.listSolvers(onlyAvailable=True)
+          print("solvers:", available)
+          assert any("CBC" in s for s in available), "CBC indisponivel na imagem"
+
+          prob = pulp.LpProblem("smoke", pulp.LpMinimize)
+          x = pulp.LpVariable("x", lowBound=0)
+          prob += 3 * x
+          prob += x >= 2
+          prob.solve(pulp.PULP_CBC_CMD(msg=False))
+          assert pulp.LpStatus[prob.status] == "Optimal"
+          print("smoke test ok")
+          PY
+
+      - name: O container sobe e responde
+        run: |
+          docker run -d --name nutricasa2050-ci -p 8501:8501 nutricasa2050:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8501/_stcore/health > /dev/null 2>&1; then
+              echo "app respondeu na tentativa $i"
+              docker rm -f nutricasa2050-ci
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "o app nao respondeu em 60s"
+          docker logs nutricasa2050-ci
+          docker rm -f nutricasa2050-ci
+          exit 1
