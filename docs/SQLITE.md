@@ -84,14 +84,16 @@ from sqlalchemy import create_engine, text
 engine = create_engine("sqlite:///var/nutricasa2050.db")
 
 with engine.begin() as conexao:  # begin() já dá commit/rollback automático
-    conexao.execute(text("""
+    conexao.execute(
+        text("""
         CREATE TABLE IF NOT EXISTS simulacao (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             resultado REAL,
             criado_em TEXT DEFAULT CURRENT_TIMESTAMP
         )
-    """))
+    """)
+    )
     conexao.execute(
         text("INSERT INTO simulacao (nome, resultado) VALUES (:nome, :resultado)"),
         {"nome": "cenario-1", "resultado": 42.5},
@@ -146,8 +148,8 @@ Essa leitura já existe pronta no projeto, em
 ```python
 from nutricasa2050.config import database_path, environment
 
-print(environment())      # "development" ou "test"
-print(database_path())    # caminho do arquivo .db correspondente
+print(environment())  # "development" ou "test"
+print(database_path())  # caminho do arquivo .db correspondente
 ```
 
 O truque ali é que cortar só o prefixo `sqlite:///` já resolve os dois formatos
