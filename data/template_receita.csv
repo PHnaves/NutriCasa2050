@@ -1,0 +1,8 @@
+# receitas.csv:
+id,nome,tempo_min,tags_dieta,preferencia
+arroz_ovo,Arroz Rápido com Ovo,15,vegetariano;sem_gluten,0.8
+
+# matriz_a.csv (uma linha por par receita-ingrediente):
+receita_id,ingrediente_id,quantidade_por_porcao
+arroz_ovo,1,0.1
+arroz_ovo,5,2.0
