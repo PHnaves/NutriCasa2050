@@ -22,3 +22,21 @@ def test_validades_positivas():
     for item in ingredientes:
         validade = int(item["validade_dias"])
         assert validade > 0, f"Validade inválida para {item['nome']}: {item['validade_dias']}"
+
+
+def test_precos_preenchidos_e_positivos():
+    ingredientes = _carregar_ingredientes()
+
+    for item in ingredientes:
+        assert item["preco_embalagem"], f"Preço da embalagem ausente para {item['nome']}."
+        preco = float(item["preco_embalagem"])
+        assert preco > 0, f"Preço inválido para {item['nome']}: {item['preco_embalagem']}"
+
+
+def test_tamanhos_de_embalagem_preenchidos():
+    ingredientes = _carregar_ingredientes()
+
+    for item in ingredientes:
+        assert item["tamanho_embalagem"], f"Tamanho da embalagem ausente para {item['nome']}."
+        tamanho = float(item["tamanho_embalagem"])
+        assert tamanho > 0, f"Tamanho inválido para {item['nome']}: {item['tamanho_embalagem']}"
