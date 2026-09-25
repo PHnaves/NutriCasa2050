@@ -1,0 +1,25 @@
+id,nome,tempo_min,tags_dieta,preferencia
+arroz_ovo,Arroz Rápido com Ovo,15,vegetariano;sem_gluten,0.80
+macarrao_frango_tomate,Macarrão com Frango e Molho de Tomate,25,sem_lactose,0.72
+feijao_arroz_couve,"Feijão, Arroz e Couve",40,vegetariano;sem_gluten;sem_lactose,0.88
+tilapia_assada_salada,Tilápia Assada com Salada,20,sem_gluten;sem_lactose,0.76
+omelete_legumes,Omelete de Legumes,12,vegetariano;sem_gluten,0.66
+sanduiche_quente_queijo_tomate,Sanduíche Quente de Queijo e Tomate,8,vegetariano,0.59
+sopa_legumes_frango,Sopa de Legumes com Frango,35,sem_gluten;sem_lactose,0.70
+frango_ao_molho_tomate,Frango ao Molho de Tomate,28,sem_gluten;sem_lactose,0.73
+arroz_carreteiro,Arroz Carreteiro,45,alto_sodio;sem_gluten;sem_lactose,0.81
+torta_legumes,Torta de Legumes,50,vegetariano,0.62
+panqueca_banana_aveia,Panqueca de Banana e Aveia,20,vegetariano;sem_lactose,0.68
+iogurte_aveia_maca,Iogurte com Aveia e Maçã,5,vegetariano,0.55
+salada_repolho_maca,Salada de Repolho com Maçã,15,vegetariano;sem_gluten;sem_lactose,0.74
+escondidinho_batata_carne,Escondidinho de Batata com Carne,60,sem_gluten;sem_lactose,0.77
+peixe_assado_pure,Peixe Assado com Purê de Batata,35,sem_gluten;sem_lactose,0.84
+macarrao_atum_ervilha,Macarrão com Atum e Ervilha,20,alto_sodio,0.61
+creme_cenoura,Creme de Cenoura,30,vegetariano;sem_gluten;sem_lactose,0.57
+frango_grelhado_batata,Frango Grelhado com Batata,25,sem_gluten;sem_lactose,0.79
+feijao_com_calabresa,Feijão com Calabresa,50,alto_sodio;sem_gluten;sem_lactose,0.53
+farofa_de_ovo,Farofa de Ovo,15,vegetariano;sem_gluten;sem_lactose,0.64
+bolo_banana_aveia,Bolo de Banana com Aveia,40,vegetariano;sem_lactose,0.69
+arroz_de_forno_legumes,Arroz de Forno com Legumes,55,vegetariano,0.86
+salada_frango_maca,Salada de Frango com Maçã,15,sem_gluten;sem_lactose,0.67
+arroz_feijao_ovo,"Arroz, Feijão e Ovo",30,vegetariano;sem_gluten;sem_lactose,0.90
