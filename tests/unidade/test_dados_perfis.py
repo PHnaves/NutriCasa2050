@@ -1,11 +1,10 @@
-import os
 import json
 
 CAMINHO_PERFIS = "data/perfis/familia_demo.json"
 
 
 def carregar_dados():
-    with open(CAMINHO_PERFIS, "r", encoding="utf-8") as f:
+    with open(CAMINHO_PERFIS, encoding="utf-8") as f:
         return json.load(f)
 
 
