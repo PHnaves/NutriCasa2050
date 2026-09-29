@@ -42,6 +42,11 @@ Este projeto adota uma regra conservadora de validade em dias para dar prioridad
 - Fonte principal: rótulos de alimentos enlatados e diretrizes de segurança alimentar para produtos de prateleira, que normalmente indicam validade anual ou superior quando armazenados corretamente.
 - Uso no modelo: a regra de 365 dias evita que itens estáveis recebam prioridade indevida por vencimento iminente.
 
+## 9) Referências Nutricionais e Prescrição (Perfis Familiares)
+- **Fonte Principal:** Diretrizes da *Dietary Reference Intakes (DRIs)* publicadas pelo *Food and Nutrition Board* e recomendação do Ministério da Saúde (Guia Alimentar para a População Brasileira).
+- **Justificativa de Sódio:** O teto de sódio para o perfil "Idoso Hipertenso" foi reduzido para um máximo de 1400mg diários (alvo de 1000mg para almoço e jantar combinados), alinhado com as diretrizes da Sociedade Brasileira de Cardiologia para manejo de hipertensão.
+- **Fatores de Porção:** O fator de 0,6 para crianças baseia-se na proporcionalidade calórica diária em relação a um adulto padrão de 2000 kcal a 2500 kcal.
+
 ## Observação metodológica
 - As estimativas foram padronizadas para o modelo e não substituem a data de validade do rótulo do produto comprado;
 - Em uma banca, a citação pode ser feita a partir de rótulos de embalagem, instruções da ANVISA e guias de segurança alimentar; esta documentação serve como registro formal do critério usado no projeto.

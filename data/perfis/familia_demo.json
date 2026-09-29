@@ -1,0 +1,58 @@
+[
+  {
+    "id": "adulto_ativo",
+    "nome": "Marcos (Ativo)",
+    "fator_porcao": 1.0,
+    "tags_bloqueadas": [],
+    "faixas": {
+      "kcal": {"min": 2200, "max": 2600, "alvo": 2400},
+      "proteina_g": {"min": 100, "max": 150, "alvo": 120},
+      "carboidrato_g": {"min": 250, "max": 350, "alvo": 300},
+      "gordura_g": {"min": 60, "max": 90, "alvo": 75},
+      "sodio_mg": {"min": 1500, "max": 2300, "alvo": 2000},
+      "fibra_g": {"min": 25, "max": 40, "alvo": 30}
+    }
+  },
+  {
+    "id": "adulto_sedentario",
+    "nome": "Ana (Sedentária)",
+    "fator_porcao": 1.0,
+    "tags_bloqueadas": [],
+    "faixas": {
+      "kcal": {"min": 1700, "max": 2000, "alvo": 1900},
+      "proteina_g": {"min": 50, "max": 80, "alvo": 65},
+      "carboidrato_g": {"min": 200, "max": 250, "alvo": 220},
+      "gordura_g": {"min": 40, "max": 60, "alvo": 50},
+      "sodio_mg": {"min": 1000, "max": 2000, "alvo": 1500},
+      "fibra_g": {"min": 20, "max": 35, "alvo": 25}
+    }
+  },
+  {
+    "id": "crianca_8_anos",
+    "nome": "Leo (Criança)",
+    "fator_porcao": 0.6,
+    "tags_bloqueadas": [],
+    "faixas": {
+      "kcal": {"min": 1300, "max": 1600, "alvo": 1500},
+      "proteina_g": {"min": 30, "max": 50, "alvo": 40},
+      "carboidrato_g": {"min": 150, "max": 200, "alvo": 180},
+      "gordura_g": {"min": 35, "max": 55, "alvo": 45},
+      "sodio_mg": {"min": 1000, "max": 1500, "alvo": 1200},
+      "fibra_g": {"min": 15, "max": 25, "alvo": 20}
+    }
+  },
+  {
+    "id": "idoso_hipertenso",
+    "nome": "João (Idoso)",
+    "fator_porcao": 0.8,
+    "tags_bloqueadas": ["alto_sodio"],
+    "faixas": {
+      "kcal": {"min": 1600, "max": 1900, "alvo": 1800},
+      "proteina_g": {"min": 60, "max": 90, "alvo": 75},
+      "carboidrato_g": {"min": 180, "max": 230, "alvo": 200},
+      "gordura_g": {"min": 40, "max": 60, "alvo": 50},
+      "sodio_mg": {"min": 800, "max": 1400, "alvo": 1000},
+      "fibra_g": {"min": 25, "max": 35, "alvo": 30}
+    }
+  }
+]
