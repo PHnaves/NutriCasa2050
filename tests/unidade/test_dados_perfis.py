@@ -40,5 +40,6 @@ def test_familia_tem_contraste():
 
     # Valida se a maior faixa calórica é pelo menos 40% maior que a menor
     assert maior_kcal >= (menor_kcal * 1.4), (
-        "O contraste da família falhou. A diferença entre a maior e a menor dieta precisa ser de pelo menos 40%."
+        "O contraste da família falhou. A diferença entre a maior "
+        "e a menor dieta precisa ser de pelo menos 40%."
     )
