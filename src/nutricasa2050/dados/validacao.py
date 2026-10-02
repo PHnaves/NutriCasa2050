@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 BASE_DIR = Path(__file__).resolve().parents[3]
 DATA_DIR = BASE_DIR / "data"
 
@@ -128,7 +127,9 @@ def _verificar_ids_unicos(
 		)
 
 	duplicados = sorted(
-		valor for valor, quantidade in Counter(valor for valor in ids if valor).items() if quantidade > 1
+		valor
+		for valor, quantidade in Counter(valor for valor in ids if valor).items()
+		if quantidade > 1
 	)
 	if duplicados:
 		relatorio.erro(f"{rotulo}: IDs duplicados encontrados: {', '.join(duplicados)}.")
@@ -165,7 +166,8 @@ def checar_ingredientes_existem(
 			)
 		if ingrediente_id not in ingredientes_conhecidos:
 			relatorio.erro(
-				f"Linha {indice}: ingrediente desconhecido na matriz: {ingrediente_id or '[vazio]'}."
+				"Linha "
+				f"{indice}: ingrediente desconhecido na matriz: {ingrediente_id or '[vazio]'}."
 			)
 
 
@@ -288,7 +290,8 @@ def checar_calorias_plausiveis(
 
 		if conseguiu_calcular and not (minimo <= calorias <= maximo):
 			relatorio.erro(
-				f"Receita {receita_id or '[vazio]'} com {calorias:.1f} kcal por porção, fora do intervalo {minimo:.0f}-{maximo:.0f}."
+				f"Receita {receita_id or '[vazio]'} com {calorias:.1f} kcal por porção, "
+				f"fora do intervalo {minimo:.0f}-{maximo:.0f}."
 			)
 
 
@@ -309,7 +312,8 @@ def checar_lotes_validos(
 			relatorio.erro(f"Lote sem identificador na linha {indice}.")
 		if ingrediente_id not in ingredientes_conhecidos:
 			relatorio.erro(
-				f"Lote {lote_id} referencia ingrediente desconhecido: {ingrediente_id or '[vazio]'}."
+				"Lote "
+				f"{lote_id} referencia ingrediente desconhecido: {ingrediente_id or '[vazio]'}."
 			)
 		if quantidade is None or quantidade <= 0:
 			relatorio.erro(f"Lote {lote_id} com quantidade inválida: {item.get('quantidade')!r}.")

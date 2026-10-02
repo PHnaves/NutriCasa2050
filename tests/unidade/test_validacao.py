@@ -7,7 +7,6 @@ from pathlib import Path
 from nutricasa2050.dados import validacao as cli_validacao
 from nutricasa2050.dados import validacao as core_validacao
 
-
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "validacao"
 
 
