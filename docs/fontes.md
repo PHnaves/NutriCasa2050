@@ -47,6 +47,11 @@ Este projeto adota uma regra conservadora de validade em dias para dar prioridad
 - **Justificativa de Sódio:** O teto de sódio para o perfil "Idoso Hipertenso" foi reduzido para um máximo de 1400mg diários (alvo de 1000mg para almoço e jantar combinados), alinhado com as diretrizes da Sociedade Brasileira de Cardiologia para manejo de hipertensão.
 - **Fatores de Porção:** O fator de 0,6 para crianças baseia-se na proporcionalidade calórica diária em relação a um adulto padrão de 2000 kcal a 2500 kcal.
 
+## 10) Composição Nutricional (Matriz)
+- **Fonte Principal:** Tabela Brasileira de Composição de Alimentos (TACO), 4ª edição, NEPA/Unicamp.
+- **Data de Consulta:** Outubro de 2026.
+- **Uso no modelo:** Dados originais foram convertidos para as unidades de compra (kg, litro, unidade, maço) e multiplicados pelas frações da matriz A para compor a tabela `nutrientes.csv`.
+
 ## Observação metodológica
 - As estimativas foram padronizadas para o modelo e não substituem a data de validade do rótulo do produto comprado;
 - Em uma banca, a citação pode ser feita a partir de rótulos de embalagem, instruções da ANVISA e guias de segurança alimentar; esta documentação serve como registro formal do critério usado no projeto.
