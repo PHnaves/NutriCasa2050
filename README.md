@@ -1,5 +1,7 @@
 # NutriCasa 2050
 
+[![ci](https://github.com/PHnaves/NutriCasa2050/actions/workflows/ci.yml/badge.svg)](https://github.com/PHnaves/NutriCasa2050/actions/workflows/ci.yml)
+
 Simulação NutriCasa 2050 — app em Streamlit com otimização linear (PuLP) e
 persistência em SQLite.
 
@@ -18,6 +20,9 @@ Sem Docker, ou para entender cada passo, veja o guia completo em
 - [docs/RODANDO.md](docs/RODANDO.md) — como rodar o projeto, com e sem Docker.
 - [docs/SQLITE.md](docs/SQLITE.md) — como o SQLite funciona neste projeto:
   conexão, criação de tabelas e por que existem dois bancos separados.
+- [docs/formulacao.md](docs/formulacao.md) — a formulação matemática do
+  problema de otimização: conjuntos, parâmetros, variáveis, função objetivo
+  e as doze restrições.
 
 ## Estrutura
 
