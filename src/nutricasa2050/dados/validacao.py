@@ -16,9 +16,13 @@ ARQUIVO_RECEITAS = DATA_DIR / "receitas.csv"
 ARQUIVO_MATRIZ = DATA_DIR / "matriz_a.csv"
 ARQUIVO_LOTES = DATA_DIR / "estoque_inicial.csv"
 ARQUIVO_FAIXAS = DATA_DIR / "faixas.csv"
+ARQUIVO_NUTRIENTES = DATA_DIR / "nutrientes.csv"
 
-COLUNAS_NUTRIENTES = (
-    "calorias_kcal",
+# Os nutrientes sao calculados por receita (ver S1-07 / scripts/gerar_nutrientes.py),
+# a partir da TACO cruzada com a matriz A. Nao existem colunas de nutriente em
+# ingredientes.csv.
+NUTRIENTES_ESPERADOS = (
+    "kcal",
     "proteina_g",
     "carboidrato_g",
     "gordura_g",
@@ -240,53 +244,47 @@ def checar_validades(
             relatorio.erro(f"Ingrediente {nome} com validade_dias inválida: {validade}.")
 
 
+def _nutrientes_por_receita(nutrientes: list[dict[str, str]]) -> dict[str, dict[str, float | None]]:
+    valores_por_receita: dict[str, dict[str, float | None]] = defaultdict(dict)
+    for item in nutrientes:
+        receita_id = _texto(item.get("receita_id"))
+        nutriente = _texto(item.get("nutriente"))
+        if receita_id and nutriente:
+            valores_por_receita[receita_id][nutriente] = _valor_decimal(item.get("valor"))
+    return valores_por_receita
+
+
 def checar_nutrientes_completos(
-    ingredientes: list[dict[str, str]],
+    receitas: list[dict[str, str]],
+    nutrientes: list[dict[str, str]],
     relatorio: Relatorio,
 ) -> None:
-    for item in ingredientes:
-        nome = _texto(item.get("nome")) or _campo_id(item) or "[sem nome]"
-        faltando = [campo for campo in COLUNAS_NUTRIENTES if not _texto(item.get(campo))]
+    valores_por_receita = _nutrientes_por_receita(nutrientes)
+
+    for receita in receitas:
+        receita_id = _campo_id(receita)
+        valores = valores_por_receita.get(receita_id, {})
+        faltando = [nome for nome in NUTRIENTES_ESPERADOS if valores.get(nome) is None]
         if faltando:
-            relatorio.erro(f"Ingrediente {nome} sem nutrientes completos: {', '.join(faltando)}.")
+            relatorio.erro(
+                f"Receita {receita_id or '[vazio]'} sem nutrientes completos: "
+                f"{', '.join(faltando)}."
+            )
 
 
 def checar_calorias_plausiveis(
-    ingredientes: list[dict[str, str]],
     receitas: list[dict[str, str]],
-    matriz: list[dict[str, str]],
+    nutrientes: list[dict[str, str]],
     relatorio: Relatorio,
     minimo: float = 100.0,
     maximo: float = 1500.0,
 ) -> None:
-    ingredientes_por_id = _ingredientes_por_id(ingredientes)
-    linhas_por_receita: dict[str, list[dict[str, str]]] = defaultdict(list)
-    for item in matriz:
-        receita_id = _texto(item.get("receita_id"))
-        if receita_id:
-            linhas_por_receita[receita_id].append(item)
+    valores_por_receita = _nutrientes_por_receita(nutrientes)
 
     for receita in receitas:
         receita_id = _campo_id(receita)
-        calorias = 0.0
-        conseguiu_calcular = True
-
-        for item in linhas_por_receita.get(receita_id, []):
-            ingrediente_id = _texto(item.get("ingrediente_id"))
-            ingrediente = ingredientes_por_id.get(ingrediente_id)
-            if not ingrediente:
-                conseguiu_calcular = False
-                continue
-
-            calorias_ingrediente = _valor_decimal(ingrediente.get("calorias_kcal"))
-            quantidade = _valor_decimal(item.get("quantidade_por_porcao"))
-            if calorias_ingrediente is None or quantidade is None:
-                conseguiu_calcular = False
-                continue
-
-            calorias += calorias_ingrediente * quantidade
-
-        if conseguiu_calcular and not (minimo <= calorias <= maximo):
+        calorias = valores_por_receita.get(receita_id, {}).get("kcal")
+        if calorias is not None and not (minimo <= calorias <= maximo):
             relatorio.erro(
                 f"Receita {receita_id or '[vazio]'} com {calorias:.1f} kcal por porção, "
                 f"fora do intervalo {minimo:.0f}-{maximo:.0f}."
@@ -360,12 +358,14 @@ def validar(
     matriz: list[dict[str, str]] | None = None,
     lotes: list[dict[str, str]] | None = None,
     faixas: list[dict[str, str]] | None = None,
+    nutrientes: list[dict[str, str]] | None = None,
 ) -> Relatorio:
     ingredientes = _carregar_csv(ARQUIVO_INGREDIENTES) if ingredientes is None else ingredientes
     receitas = _carregar_csv(ARQUIVO_RECEITAS) if receitas is None else receitas
     matriz = _carregar_csv(ARQUIVO_MATRIZ) if matriz is None else matriz
     lotes = _carregar_csv(ARQUIVO_LOTES) if lotes is None else lotes
     faixas = _carregar_csv(ARQUIVO_FAIXAS) if faixas is None else faixas
+    nutrientes = _carregar_csv(ARQUIVO_NUTRIENTES) if nutrientes is None else nutrientes
 
     relatorio = Relatorio()
     checar_ids_unicos(ingredientes, receitas, lotes, relatorio)
@@ -374,8 +374,8 @@ def validar(
     checar_ingredientes_orfaos(ingredientes, matriz, relatorio)
     checar_precos_e_embalagens(ingredientes, relatorio)
     checar_validades(ingredientes, relatorio)
-    checar_nutrientes_completos(ingredientes, relatorio)
-    checar_calorias_plausiveis(ingredientes, receitas, matriz, relatorio)
+    checar_nutrientes_completos(receitas, nutrientes, relatorio)
+    checar_calorias_plausiveis(receitas, nutrientes, relatorio)
     checar_lotes_validos(lotes, ingredientes, relatorio)
     checar_tem_lote_vencendo_cedo(lotes, relatorio)
     checar_faixas_coerentes(faixas, relatorio)

@@ -1,0 +1,13 @@
+receita_id,nutriente,valor
+r1,kcal,320
+r1,proteina_g,18
+r1,carboidrato_g,45
+r1,gordura_g,10
+r1,fibra_g,3
+r1,sodio_mg,150
+r2,kcal,410
+r2,proteina_g,14
+r2,carboidrato_g,60
+r2,gordura_g,8
+r2,fibra_g,4
+r2,sodio_mg,200

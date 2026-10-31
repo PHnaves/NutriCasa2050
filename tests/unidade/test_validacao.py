@@ -84,6 +84,36 @@ def test_detecta_preco_nulo() -> None:
     assert any("preco_embalagem" in erro.lower() for erro in relatorio.erros)
 
 
+def test_detecta_nutriente_faltante() -> None:
+    receitas = carregar("receitas.csv")
+    nutrientes = carregar("nutrientes.csv")
+    relatorio = core_validacao.Relatorio()
+
+    nutrientes = [
+        item
+        for item in nutrientes
+        if not (item["receita_id"] == "r1" and item["nutriente"] == "fibra_g")
+    ]
+
+    core_validacao.checar_nutrientes_completos(receitas, nutrientes, relatorio)
+
+    assert any("sem nutrientes completos" in erro.lower() for erro in relatorio.erros)
+
+
+def test_detecta_caloria_implausivel() -> None:
+    receitas = carregar("receitas.csv")
+    nutrientes = carregar("nutrientes.csv")
+    relatorio = core_validacao.Relatorio()
+
+    for item in nutrientes:
+        if item["receita_id"] == "r1" and item["nutriente"] == "kcal":
+            item["valor"] = "3000"
+
+    core_validacao.checar_calorias_plausiveis(receitas, nutrientes, relatorio)
+
+    assert any("fora do intervalo" in erro.lower() for erro in relatorio.erros)
+
+
 def test_detecta_faixa_invertida() -> None:
     faixas = carregar("faixas.csv")
     relatorio = core_validacao.Relatorio()
@@ -102,6 +132,7 @@ def test_aceita_catalogo_valido() -> None:
     matriz = carregar("matriz.csv")
     lotes = carregar("lotes.csv")
     faixas = carregar("faixas.csv")
+    nutrientes = carregar("nutrientes.csv")
 
     relatorio = core_validacao.validar(
         ingredientes=ingredientes,
@@ -109,6 +140,7 @@ def test_aceita_catalogo_valido() -> None:
         matriz=matriz,
         lotes=lotes,
         faixas=faixas,
+        nutrientes=nutrientes,
     )
 
     assert relatorio.ok
@@ -116,7 +148,15 @@ def test_aceita_catalogo_valido() -> None:
 
 
 def test_main_sai_com_erro_quando_invalido(tmp_path, monkeypatch, capsys) -> None:
-    for nome in ("ingredientes.csv", "receitas.csv", "matriz.csv", "lotes.csv", "faixas.csv"):
+    nomes = (
+        "ingredientes.csv",
+        "receitas.csv",
+        "matriz.csv",
+        "lotes.csv",
+        "faixas.csv",
+        "nutrientes.csv",
+    )
+    for nome in nomes:
         shutil.copyfile(FIXTURES / nome, tmp_path / nome)
 
     ingredientes = carregar("ingredientes.csv")
@@ -132,6 +172,7 @@ def test_main_sai_com_erro_quando_invalido(tmp_path, monkeypatch, capsys) -> Non
     monkeypatch.setattr(core_validacao, "ARQUIVO_MATRIZ", tmp_path / "matriz.csv")
     monkeypatch.setattr(core_validacao, "ARQUIVO_LOTES", tmp_path / "lotes.csv")
     monkeypatch.setattr(core_validacao, "ARQUIVO_FAIXAS", tmp_path / "faixas.csv")
+    monkeypatch.setattr(core_validacao, "ARQUIVO_NUTRIENTES", tmp_path / "nutrientes.csv")
 
     codigo = cli_validacao.main(["--validar"])
     saida = capsys.readouterr()

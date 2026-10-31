@@ -46,10 +46,10 @@ jobs:
       - name: Testes
         run: pytest
 
-      # A FAZER, quando os modulos existirem:
-      #
-      # - name: Validar o catalogo de dados        (card S1-06)
-      #   run: python -m nutricasa2050.dados.validacao --validar
+      - name: Validar o catalogo de dados
+        run: python -m nutricasa2050.dados.validacao --validar
+
+      # A FAZER:
       #
       # - name: Cobertura                          (a partir do Sprint 2)
       #   run: pytest --cov --cov-report=term-missing
