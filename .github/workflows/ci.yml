@@ -41,7 +41,7 @@ jobs:
           pip install -e . --no-deps
 
       - name: Estilo e erros de codigo
-        run: ruff check src tests
+        run: ruff check src tests app.py
 
       - name: Testes
         run: pytest

@@ -1,0 +1,7 @@
+# Camada 1 (card S5-07) — cores da logo (ver logo-horizontal-nutricasa.png).
+[theme]
+primaryColor = "#1D8A66"
+backgroundColor = "#FDFDFC"
+secondaryBackgroundColor = "#F2EFE9"
+textColor = "#2B2B28"
+font = "sans serif"

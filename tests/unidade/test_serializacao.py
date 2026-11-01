@@ -28,13 +28,23 @@ def _catalogo_e_parametros():
     return catalogo, parametros
 
 
-def test_dicionario_tem_as_seis_secoes() -> None:
+def test_dicionario_tem_as_sete_secoes() -> None:
+    """Ganhou "estoque" no S5-05: a tela precisa mostrar a despensa dia
+    a dia, e isso nao vinha em nenhuma das seis secoes originais."""
     catalogo, parametros = _catalogo_e_parametros()
     solucao = resolver(catalogo, parametros)
 
     resultado = resultado_para_dict(solucao, catalogo, parametros)
 
-    assert set(resultado) == {"resumo", "cardapio", "porcoes", "compras", "descartes", "aderencia"}
+    assert set(resultado) == {
+        "resumo",
+        "cardapio",
+        "porcoes",
+        "compras",
+        "descartes",
+        "estoque",
+        "aderencia",
+    }
 
 
 def test_resultado_e_convertivel_para_json() -> None:

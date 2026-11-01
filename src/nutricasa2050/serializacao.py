@@ -82,6 +82,29 @@ def _descartes(solucao: Solucao, catalogo: Catalogo) -> list[dict]:
     return resultado
 
 
+def _estoque(solucao: Solucao, catalogo: Catalogo) -> list[dict]:
+    """A despensa dia a dia: quanto resta de cada lote, e quantos dias
+    faltam para vencer A PARTIR daquele dia — e o que a tela (S5-05)
+    usa para colorir as barras pela proximidade do vencimento.
+    """
+    resultado = []
+    for (lote_id, dia), quantidade in solucao.estoque.items():
+        lote = catalogo.lotes[lote_id]
+        ingrediente = catalogo.ingredientes[lote.ingrediente_id]
+        resultado.append(
+            {
+                "lote_id": lote_id,
+                "ingrediente_id": lote.ingrediente_id,
+                "ingrediente_nome": ingrediente.nome,
+                "dia": dia,
+                "quantidade": quantidade,
+                "dia_vencimento": lote.dia_vencimento,
+                "dias_restantes": lote.dia_vencimento - dia,
+            }
+        )
+    return resultado
+
+
 def _aderencia(solucao: Solucao, catalogo: Catalogo, parametros: Parametros) -> list[dict]:
     """"valor" vem das porcoes realizadas (nao e uma variavel de decisao em
     si). "desvio" e "folga" vem das variaveis de R7/R5 (S3-06) —
@@ -134,6 +157,7 @@ def resultado_para_dict(solucao: Solucao, catalogo: Catalogo, parametros: Parame
     porcoes = _porcoes(solucao)
     compras = _compras(solucao, catalogo)
     descartes = _descartes(solucao, catalogo)
+    estoque = _estoque(solucao, catalogo)
     aderencia = _aderencia(solucao, catalogo, parametros)
 
     resumo = {
@@ -153,5 +177,6 @@ def resultado_para_dict(solucao: Solucao, catalogo: Catalogo, parametros: Parame
         "porcoes": porcoes,
         "compras": compras,
         "descartes": descartes,
+        "estoque": estoque,
         "aderencia": aderencia,
     }

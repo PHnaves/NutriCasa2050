@@ -84,10 +84,10 @@ def adicionar_visita(catalogo: Catalogo, cenario: Cenario) -> Catalogo:
 
 
 def pular_refeicoes(catalogo: Catalogo, cenario: Cenario) -> Catalogo:
-    """Marca algumas refeicoes como "nao aconteceram" (Catalogo.refeicoes_puladas)
-    — so os baselines heuristicos (S4-02/03) honram isso; o solver otimizado
-    continua planejando normalmente para esses horarios (simplificacao
-    documentada no campo)."""
+    """Marca algumas refeicoes como "nao aconteceram"
+    (Catalogo.refeicoes_puladas) — os baselines (S4-02/03) e o R1 do
+    solver otimizado (atualizado no S5-06, ver restricoes.r1_cobertura)
+    honram isso: ninguem come nessa refeicao, em nenhuma estrategia."""
     if cenario.refeicoes_puladas <= 0:
         return catalogo
     rng = random.Random(cenario.semente + 3)
