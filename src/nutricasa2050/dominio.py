@@ -74,6 +74,20 @@ class Catalogo:
     nutrientes: dict[tuple[str, str], float]
     lotes: dict[str, Lote]
     membros: dict[str, Membro]
+    # (dia, refeicao) marcados por simulacao.cenarios.pular_refeicoes (S4-01).
+    # So os baselines heuristicos (S4-02/03) leem isto — o solver (R1) exige
+    # uma porcao completa em toda refeicao do horizonte, e nao tem como
+    # pular uma so para um cenario especifico sem reescrever a restricao;
+    # e uma simplificacao assumida e documentada, nao um bug.
+    refeicoes_puladas: frozenset[tuple[int, str]] = frozenset()
+    # ids de ingrediente marcados por simulacao.cenarios.esquecer_itens
+    # (S4-01). O solver ja evita compra-los sozinho (o preco fica
+    # proibitivo, R12/objetivo cuidam disso); os baselines (S4-02/03) NAO
+    # olham preco na hora de decidir a compra habitual, entao precisam
+    # deste sinal explicito — senao comprariam a quantidade normal mesmo
+    # a um preco 1000x maior, e um descarte depois viraria um valor em
+    # reais sem nenhum sentido.
+    itens_esquecidos: frozenset[str] = frozenset()
 
     def total_receitas(self) -> int:
         return len(self.receitas)

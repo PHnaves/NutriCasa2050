@@ -20,7 +20,11 @@ _DESCRICOES_STATUS = {
     "Optimal": "cardapio encontrado dentro de todas as regras.",
     "Infeasible": "nao existe cardapio que atenda todas as regras com esses parametros.",
     "Unbounded": "o problema esta mal configurado: o objetivo pode cair sem limite.",
-    "Not Solved": "o solver nao terminou a tempo.",
+    "Not Solved": (
+        "o solver bateu no tempo limite antes de provar que achou o melhor "
+        "cardapio possivel — mas o que ele encontrou ate ali e usado mesmo "
+        "assim (pode nao ser o otimo; ver card S4-05)."
+    ),
     "Undefined": "o solver nao conseguiu determinar um resultado.",
 }
 
@@ -92,10 +96,11 @@ def resolver(catalogo: Catalogo, parametros: Parametros) -> Solucao:
 
     status = LpStatus[problema.status]
 
-    if status != "Optimal":
-        # Sem solucao valida: nao ha cardapio, porcao, compra, descarte,
-        # estoque ou aderencia para reportar (varValue pode ter lixo do
-        # branch-and-bound, nao confiavel quando o status nao e Optimal).
+    if status in ("Infeasible", "Unbounded", "Undefined"):
+        # De fato sem solucao valida: nao ha cardapio, porcao, compra,
+        # descarte, estoque ou aderencia para reportar (varValue pode ter
+        # lixo do branch-and-bound de um ramo abandonado, nao confiavel
+        # quando o proprio solver concluiu que a resposta nao existe).
         return Solucao(
             status=status,
             tempo_segundos=tempo_segundos,
@@ -108,8 +113,15 @@ def resolver(catalogo: Catalogo, parametros: Parametros) -> Solucao:
             aderencia=dict(_ADERENCIA_VAZIA),
         )
 
+    # "Optimal" (provado) OU "Not Solved" (bateu no tempo limite, S4-05) —
+    # nos dois casos o CBC so grava um incumbente quando ele e uma solucao
+    # INTEIRA E VIAVEL de verdade (B&B nunca promove um ramo parcial a
+    # incumbente); a diferenca e so se ficou provado que e o melhor
+    # possivel. Extrai normalmente; se o solver realmente nao achou nada
+    # a tempo, varValue fica None em tudo e a extracao (que ja filtra
+    # None) devolve vazio por conta propria, sem precisar de outro caso.
     valor_objetivo = problema.objective.value()
-    if valor_objetivo is None:
+    if valor_objetivo is None and status == "Optimal":
         # Objetivo sem nenhuma variavel (ex.: nenhum dia de compra no
         # horizonte) — PuLP devolve None em vez da constante nesse caso.
         valor_objetivo = float(problema.objective.constant)

@@ -20,7 +20,13 @@ def database_path() -> str:
 
 
 def solver_tempo_limite() -> int:
-    return int(os.environ.get("NUTRICASA2050_SOLVER_TIMEOUT", "30"))
+    # Era 30s (S2-09); baixado para 10s no S4-05 depois de medir que, com
+    # os 4 membros reais, o CBC as vezes passava dos 30s de PAREDE so por
+    # overhead de escrever/ler arquivo, mesmo com timeLimit=30 — e porque
+    # rodar 500 cenarios (card S4-04) com 30s cada levaria horas. Para
+    # lotes grandes, sobrescreva com um valor ainda menor (ex.: 2) via
+    # esta variavel — ver Makefile, alvo `resultados`.
+    return int(os.environ.get("NUTRICASA2050_SOLVER_TIMEOUT", "10"))
 
 
 def solver_caminho_binario() -> str | None:
