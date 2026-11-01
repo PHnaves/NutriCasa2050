@@ -1,0 +1,12 @@
+[
+  {
+    "id": "p1",
+    "nome": "Pessoa 1",
+    "fator_porcao": 1.0,
+    "tags_bloqueadas": [],
+    "faixas": {
+      "kcal": {"min": 1500, "max": 2000, "alvo": 1800},
+      "proteina_g": {"min": 40, "max": 80, "alvo": 60}
+    }
+  }
+]

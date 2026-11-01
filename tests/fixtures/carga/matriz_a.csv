@@ -1,0 +1,5 @@
+receita_id,ingrediente_id,quantidade_por_porcao
+r1,1,0.1
+r1,2,2
+r2,2,1
+r2,3,0.1

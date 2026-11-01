@@ -17,3 +17,13 @@ def database_path() -> str:
     # Tres barras viram caminho relativo, quatro viram absoluto: cortar o
     # prefixo resolve os dois casos de uma vez.
     return url.removeprefix("sqlite:///")
+
+
+def solver_tempo_limite() -> int:
+    return int(os.environ.get("NUTRICASA2050_SOLVER_TIMEOUT", "30"))
+
+
+def solver_caminho_binario() -> str | None:
+    # Vazio ou ausente usa o CBC embutido do PuLP. Troque so esta variavel
+    # para apontar para outro binario (ou outro solver) sem tocar no resto.
+    return os.environ.get("NUTRICASA2050_SOLVER_PATH") or None
