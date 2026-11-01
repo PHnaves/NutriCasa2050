@@ -58,13 +58,18 @@ def membro(
 
 
 def lote(
-    id_: str, ingrediente_id: str, quantidade: float = 1.0, dia_vencimento: int = 30
+    id_: str,
+    ingrediente_id: str,
+    quantidade: float = 1.0,
+    dia_vencimento: int = 30,
+    dia_compra: int | None = None,
 ) -> Lote:
     return Lote(
         id=id_,
         ingrediente_id=ingrediente_id,
         quantidade=quantidade,
         dia_vencimento=dia_vencimento,
+        dia_compra=dia_compra,
     )
 
 

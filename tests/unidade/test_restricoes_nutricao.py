@@ -5,6 +5,7 @@ from pulp import PULP_CBC_CMD, LpMinimize, LpProblem, LpStatus, lpSum
 
 from nutricasa2050.dominio import Faixa, Parametros
 from nutricasa2050.otimizacao.restricoes import (
+    preparar_catalogo,
     r1_cobertura,
     r2_vinculo,
     r5_faixas_nutricionais,
@@ -52,17 +53,26 @@ def test_r5_resultado_dentro_das_faixas() -> None:
     assert 400 <= consumo_kcal <= 600
 
 
-def test_r5_faixa_impossivel_gera_infeasible() -> None:
+def test_r5_faixa_impossivel_usa_folga() -> None:
+    """Desde o S3-06, R5 usa folga em vez de virar Infeasible direto: uma
+    faixa impossivel de bater (unica receita do catalogo tem 500 kcal, a
+    faixa exige 5000-6000) fica Optimal, e a folga_falta extraida mostra
+    ONDE e QUANTO precisou ceder.
+    """
     catalogo = _catalogo_nutricional(minimo=5000, maximo=6000)
     parametros = Parametros(horizonte=1, refeicoes_por_dia=1)
     variaveis = criar_variaveis(catalogo, parametros)
 
-    problema = LpProblem("teste_r5_infeasible", LpMinimize)
+    problema = LpProblem("teste_r5_folga", LpMinimize)
     r1_cobertura(problema, variaveis, catalogo, parametros)
     r2_vinculo(problema, variaveis, catalogo, parametros)
     r5_faixas_nutricionais(problema, variaveis, catalogo, parametros)
 
-    assert _resolver(problema) == "Infeasible"
+    assert _resolver(problema) == "Optimal"
+
+    dia = parametros.dias[0]
+    folga_falta = variaveis.folga_falta[("kcal", "p1", dia)].varValue
+    assert folga_falta >= 4500 - 1e-6
 
 
 def _catalogo_compra(preco_embalagem: float = 20.0):
@@ -78,6 +88,7 @@ def _catalogo_compra(preco_embalagem: float = 20.0):
 
 
 def _montar_problema_de_compra(catalogo, parametros, orcamento: float):
+    catalogo = preparar_catalogo(catalogo, parametros)
     variaveis = criar_variaveis(catalogo, parametros)
     problema = LpProblem("teste_r12", LpMinimize)
     r1_cobertura(problema, variaveis, catalogo, parametros)

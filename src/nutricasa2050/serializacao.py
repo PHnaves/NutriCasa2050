@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from nutricasa2050.dominio import Catalogo, Parametros, Solucao
+from nutricasa2050.otimizacao.restricoes import preparar_catalogo
 
 
 def _cardapio(solucao: Solucao, catalogo: Catalogo) -> list[dict]:
@@ -19,8 +20,13 @@ def _cardapio(solucao: Solucao, catalogo: Catalogo) -> list[dict]:
                 "refeicao": refeicao,
                 "receita_id": receita_id,
                 "receita_nome": catalogo.receitas[receita_id].nome,
-                # R10 (FEFO) ainda nao existe (card S3-xx) — por enquanto
-                # nenhum prato e "puxado por validade".
+                # R10 (FEFO, S3-01) ja existe no modelo, mas aqui so
+                # sabemos QUANTO foi cozinhado (x), nao de qual lote veio
+                # cada grama consumida (R8 so soma por ingrediente). Marcar
+                # isso com confianca exigiria rastrear lote por receita, o
+                # que nenhum card do Sprint 3 pede — o comportamento
+                # anti-desperdicio aparece no CARDAPIO em si (S3-08), nao
+                # numa flag por prato.
                 "puxado_por_validade": False,
                 "preparado": fracao > 0,
             }
@@ -77,9 +83,11 @@ def _descartes(solucao: Solucao, catalogo: Catalogo) -> list[dict]:
 
 
 def _aderencia(solucao: Solucao, catalogo: Catalogo, parametros: Parametros) -> list[dict]:
-    """Calculada direto das porcoes realizadas (nao depende das variaveis de
-    folga/desvio do R7, que so entram no S3-06) — por isso ja faz sentido
-    mesmo nesta fase do projeto.
+    """"valor" vem das porcoes realizadas (nao e uma variavel de decisao em
+    si). "desvio" e "folga" vem das variaveis de R7/R5 (S3-06) —
+    desvio_acima/desvio_abaixo e folga_falta/folga_sobra — porque sao elas
+    que o solver de fato decidiu usar, e nao uma distancia recalculada por
+    fora que poderia dar numero negativo se a faixa tivesse sido violada.
     """
     consumo: dict[tuple[str, str, int], float] = defaultdict(float)
     for (membro_id, receita_id, dia, refeicao), fracao in solucao.porcoes.items():
@@ -94,6 +102,11 @@ def _aderencia(solucao: Solucao, catalogo: Catalogo, parametros: Parametros) -> 
         for nutriente, faixa in membro.faixas.items():
             for dia in parametros.dias:
                 valor = consumo.get((membro_id, nutriente, dia), 0.0)
+                chave = (nutriente, membro_id, dia)
+                desvio_acima = solucao.aderencia["desvio_acima"].get(chave, 0.0)
+                desvio_abaixo = solucao.aderencia["desvio_abaixo"].get(chave, 0.0)
+                folga_falta = solucao.aderencia["folga_falta"].get(chave, 0.0)
+                folga_sobra = solucao.aderencia["folga_sobra"].get(chave, 0.0)
                 resultado.append(
                     {
                         "membro_id": membro_id,
@@ -103,14 +116,20 @@ def _aderencia(solucao: Solucao, catalogo: Catalogo, parametros: Parametros) -> 
                         "minimo": faixa.minimo,
                         "maximo": faixa.maximo,
                         "alvo": faixa.alvo,
-                        "desvio": valor - faixa.alvo,
-                        "folga": min(faixa.maximo - valor, valor - faixa.minimo),
+                        "desvio": desvio_acima - desvio_abaixo,
+                        "folga": folga_falta + folga_sobra,
                     }
                 )
     return resultado
 
 
 def resultado_para_dict(solucao: Solucao, catalogo: Catalogo, parametros: Parametros) -> dict:
+    # preparar_catalogo e pura/deterministica (ver seu docstring): chamar
+    # de novo aqui garante que os ids de lote de compra em
+    # solucao.descartes (ex.: "compra_arroz_2") existam no catalogo usado
+    # para serializar, mesmo que o chamador tenha passado o catalogo
+    # original sem os lotes de compra.
+    catalogo = preparar_catalogo(catalogo, parametros)
     cardapio = _cardapio(solucao, catalogo)
     porcoes = _porcoes(solucao)
     compras = _compras(solucao, catalogo)
