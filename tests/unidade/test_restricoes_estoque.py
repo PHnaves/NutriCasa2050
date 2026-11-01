@@ -5,6 +5,8 @@ from pulp import PULP_CBC_CMD, LpMinimize, LpProblem, LpStatus
 
 from nutricasa2050.dominio import Parametros
 from nutricasa2050.otimizacao.restricoes import (
+    chegada_do_lote,
+    preparar_catalogo,
     r1_cobertura,
     r2_vinculo,
     r8_consumo_derivado,
@@ -76,9 +78,15 @@ def test_r9_conserva_massa() -> None:
     """O teste mais importante do sprint: entrada total (estoque inicial +
     compras) tem que ser igual a consumo + descarte + estoque final, para
     todo ingrediente. Se quebrar, tem comida sumindo ou aparecendo do nada.
+
+    Desde o S3-01, uma compra so chega no lote de compra correspondente
+    (nao no lote de estoque inicial "L1" direto) — por isso o catalogo
+    passa por preparar_catalogo antes, e a conservacao de massa e somada
+    sobre TODOS os lotes do ingrediente, nao so o "L1".
     """
     catalogo = _catalogo_arroz(quantidade_inicial=1.0)
     parametros = Parametros(horizonte=3, refeicoes_por_dia=1, dias_compra=(2,))
+    catalogo = preparar_catalogo(catalogo, parametros)
     variaveis = criar_variaveis(catalogo, parametros)
 
     problema = LpProblem("teste_r9_massa", LpMinimize)
@@ -91,23 +99,32 @@ def test_r9_conserva_massa() -> None:
 
     assert _resolver(problema) == "Optimal"
 
-    lote_obj = catalogo.lotes["L1"]
-    consumo_total = sum(variaveis.u[("L1", dia)].varValue for dia in parametros.dias)
-    descarte_total = sum(variaveis.w[("L1", dia)].varValue for dia in parametros.dias)
-    estoque_final = variaveis.s[("L1", parametros.dias[-1])].varValue
-    entrada_total = lote_obj.quantidade + sum(
-        chegada_valor(variaveis, catalogo, "1", dia) for dia in parametros.dias
+    lotes_arroz = catalogo.lotes_do_ingrediente("1")
+    consumo_total = sum(
+        variaveis.u[(lote_item.id, dia)].varValue
+        for lote_item in lotes_arroz
+        for dia in parametros.dias
+    )
+    descarte_total = sum(
+        variaveis.w[(lote_item.id, dia)].varValue
+        for lote_item in lotes_arroz
+        for dia in parametros.dias
+    )
+    estoque_final = sum(
+        variaveis.s[(lote_item.id, parametros.dias[-1])].varValue for lote_item in lotes_arroz
+    )
+    entrada_total = sum(lote_item.quantidade for lote_item in lotes_arroz) + sum(
+        _chegada_numerica(lote_item, dia, variaveis, catalogo)
+        for lote_item in lotes_arroz
+        for dia in parametros.dias
     )
 
     assert abs(entrada_total - (consumo_total + descarte_total + estoque_final)) < 1e-6
 
 
-def chegada_valor(variaveis, catalogo, ingrediente_id: str, dia: int) -> float:
-    chave = (ingrediente_id, dia)
-    if chave not in variaveis.b:
-        return 0.0
-    tamanho = catalogo.ingredientes[ingrediente_id].tamanho_embalagem
-    return tamanho * variaveis.b[chave].varValue
+def _chegada_numerica(lote_item, dia: int, variaveis, catalogo) -> float:
+    chegada = chegada_do_lote(lote_item, dia, variaveis, catalogo)
+    return chegada if isinstance(chegada, float) else chegada.value()
 
 
 def test_r9_estoque_nunca_negativo() -> None:

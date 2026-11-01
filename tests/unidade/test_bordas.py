@@ -5,7 +5,6 @@ cobre nem a refeicao mais barata do catalogo."
 """
 from __future__ import annotations
 
-import pytest
 from apoio_catalogo import construir_catalogo, ingrediente, lote, membro, receita
 
 from nutricasa2050.dominio import Parametros
@@ -46,9 +45,9 @@ def test_orcamento_zero_da_infeasible_com_mensagem() -> None:
 
 
 def test_todas_as_receitas_bloqueadas_da_infeasible_com_mensagem() -> None:
-    """R6 (bloqueio por tag) ainda nao existe como restricao propria (card
-    S3) — aqui simulamos o efeito fixando as porcoes em zero direto, do
-    mesmo jeito que Membro.pode_comer() vai orientar o R6 de verdade."""
+    """R6 (S3-03) bloqueia receita por membro via Membro.pode_comer — com
+    as duas unicas receitas do catalogo proibidas para o unico membro,
+    nao existe cardapio possivel."""
     tag = frozenset({"alto_sodio"})
     catalogo = construir_catalogo(
         receitas=[receita("r1", tags=tag), receita("r2", tags=tag)],
@@ -59,28 +58,42 @@ def test_todas_as_receitas_bloqueadas_da_infeasible_com_mensagem() -> None:
     bloqueado = catalogo.membros["p1"]
     assert all(not bloqueado.pode_comer(r) for r in catalogo.receitas.values())
 
-    from pulp import PULP_CBC_CMD, LpStatus
+    solucao = resolver(catalogo, parametros)
 
-    from nutricasa2050.otimizacao.modelo import construir
-    from nutricasa2050.otimizacao.restricoes import r1_cobertura, r2_vinculo
-
-    restricoes = [r1_cobertura, r2_vinculo]
-    problema, variaveis = construir(catalogo, parametros, restricoes_ativas=restricoes)
-    dia, refeicao = parametros.dias[0], parametros.refeicoes[0]
-    for receita_id, receita_obj in catalogo.receitas.items():
-        if not bloqueado.pode_comer(receita_obj):
-            problema += variaveis.y[("p1", receita_id, dia, refeicao)] == 0
-
-    problema.solve(PULP_CBC_CMD(msg=False))
-    status = LpStatus[problema.status]
-
-    assert status == "Infeasible"
-    assert "nao existe cardapio" in descrever_status(status).lower()
+    assert solucao.status == "Infeasible"
+    assert "nao existe cardapio" in descrever_status(solucao.status).lower()
 
 
-@pytest.mark.skip(reason="depende de R11 (tempo de preparo), que entra no card S3-05")
 def test_dia_sem_tempo_de_cozinha_empurra_pratos_para_outros_dias() -> None:
-    pass
+    """R11 (S3-05) usa um teto de minutos por dia IGUAL em todos os dias
+    (Parametros.tempo_por_dia nao varia por dia) — entao "empurrar para
+    outro dia" na pratica significa que a receita longa, mesmo sendo a
+    preferida, nunca entra no cardapio em dia nenhum, porque o tempo
+    disponivel jamais comporta ela: o solver prefere as rapidas, que tem
+    folga de sobra nas 4 aparicoes permitidas por R4.
+    """
+    catalogo = construir_catalogo(
+        receitas=[
+            receita("r1", tempo_min=10, preferencia=0.0),
+            receita("r2", tempo_min=10, preferencia=0.0),
+            receita("r3", tempo_min=10, preferencia=0.0),
+            receita("r4", tempo_min=10, preferencia=0.0),
+            receita("longa", tempo_min=120, preferencia=1.0),
+        ],
+        membros=[membro("p1")],
+    )
+    parametros = Parametros(
+        horizonte=4,
+        refeicoes_por_dia=1,
+        orcamento=0.0,
+        dias_compra=(),
+        tempo_por_dia=15.0,
+    )
+
+    solucao = resolver(catalogo, parametros)
+
+    assert solucao.status == "Optimal"
+    assert all(receita_id != "longa" for (receita_id, _dia, _refeicao) in solucao.cardapio)
 
 
 def test_catalogo_com_uma_receita_so_nao_quebra() -> None:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from apoio_catalogo import construir_catalogo, membro, receita
 
-from nutricasa2050.dominio import Faixa, Parametros, Solucao
+from nutricasa2050.dominio import Parametros, Solucao
 from nutricasa2050.otimizacao.solver import (
     _catalogo_smoke,
     _extrair_cardapio,
@@ -45,12 +45,15 @@ def test_resolver_devolve_objeto_solucao_completo() -> None:
 
 
 def test_infeasible_nao_levanta_excecao() -> None:
+    """Desde o S3-06, R5 tem folga e nao fica mais Infeasible so por
+    nutricao. Uma restricao alimentar (R6) que bloqueia a UNICA receita
+    do UNICO membro ainda e genuinamente inviavel: R1 exige comer algo,
+    R6 proibe tudo — nao ha folga que resolva isso.
+    """
+    tag = frozenset({"alergeno"})
     catalogo = construir_catalogo(
-        receitas=[receita("r1")],
-        nutrientes={("r1", "kcal"): 500.0},
-        membros=[
-            membro("p1", faixas={"kcal": Faixa(minimo=5000, maximo=6000, alvo=5500)}),
-        ],
+        receitas=[receita("r1", tags=tag)],
+        membros=[membro("p1", tags_bloqueadas=tag)],
     )
     parametros = Parametros(horizonte=1, refeicoes_por_dia=1, orcamento=0.0, dias_compra=())
 

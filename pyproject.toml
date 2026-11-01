@@ -26,3 +26,6 @@ select = ["E", "F", "I", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "lento: testes mais pesados (ex.: catalogo real, 4 membros) — ok rodar sempre, so avisa o motivo",
+]

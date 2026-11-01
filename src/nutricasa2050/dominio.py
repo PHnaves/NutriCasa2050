@@ -58,6 +58,12 @@ class Lote:
     ingrediente_id: str
     quantidade: float
     dia_vencimento: int
+    # None = lote de estoque inicial (nao recebe chegada nenhuma). Quando
+    # preenchido, marca um "lote de compra" (S3-01/R10): a chegada so e
+    # creditada a ESTE lote no dia exato da compra, nunca em outro —
+    # evita a mesma compra ser contada em mais de um lote do ingrediente
+    # quando existe mais de um (ver restricoes.chegada_do_lote).
+    dia_compra: int | None = None
 
 
 @dataclass(frozen=True)
@@ -116,8 +122,12 @@ class Pesos:
     desperdicio: float = 1.0
     preparo: float = 1.0
     desvio: float = 1.0
+    # Peso bem mais alto que os outros de proposito (card S3-06): a folga
+    # existe para o modelo nunca recusar uma faixa nutricional impossivel,
+    # NAO para ser usada de graca sempre que for mais barato que cozinhar
+    # direito.
+    folga: float = 1000.0
     preferencia: float = 1.0
-    folga: float = 1.0
     custo_por_minuto: float = 0.10
     valor_por_ponto_preferencia: float = 1.0
 
