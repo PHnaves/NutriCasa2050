@@ -124,17 +124,14 @@ def test_familia_de_quatro_consome_mais_que_de_um() -> None:
 
 
 @pytest.mark.lento
-@pytest.mark.xfail(
-    reason=(
-        "Medido em ~37s com os 4 membros reais, 7 dias e 3 refeicoes/dia "
-        "(docs/resultados.md) — acima dos 30s do card. E exatamente o "
-        "sinal que o proprio card S3-02 previu: indica que o card S4-05 "
-        "(performance) vai ser necessario. Fica xfail (nao skip) para "
-        "continuar medindo a cada rodada sem quebrar o pipeline."
-    ),
-    strict=False,
-)
 def test_tempo_de_solucao_abaixo_de_trinta_segundos() -> None:
+    """Media em ~37s quando este teste foi escrito no S3-02 (acima dos
+    30s do card) — exatamente o sinal que o card previu para abrir o
+    S4-05. Resolvido la: baixar o NUTRICASA2050_SOLVER_TIMEOUT padrao de
+    30s para 10s (config.py) foi suficiente por si so para este cenario
+    especifico (~15,3s, Optimal de verdade, nao so um incumbente) — a
+    alavanca extra de reduzir o horizonte so foi necessaria para a
+    Monte Carlo de 500 cenarios (ver docs/resultados.md, secao S4-05)."""
     catalogo = carregar_catalogo()
     parametros = Parametros(horizonte=7, refeicoes_por_dia=3, orcamento=500.0, dias_compra=(1,))
 
