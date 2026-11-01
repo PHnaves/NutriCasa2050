@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 from apoio_catalogo import construir_catalogo, membro, receita
 from pulp import PULP_CBC_CMD, LpMinimize, LpProblem, LpStatus
 
@@ -120,3 +122,28 @@ def test_sem_r3_o_modelo_cozinha_um_prato_por_pessoa() -> None:
 
     problema_com_r3, _ = _montar(com_r3=True)
     assert _resolver(problema_com_r3) == "Infeasible"
+
+
+def test_refeicao_pulada_fica_com_fracao_zero() -> None:
+    """S4-01/S5-06 ("ninguem jantou"): uma refeicao marcada em
+    catalogo.refeicoes_puladas fica com fracao servida ZERO para todo
+    membro, mesmo no modelo otimizado — nao so nos baselines."""
+    catalogo = _catalogo_simples()
+    catalogo = replace(catalogo, refeicoes_puladas=frozenset({(2, "almoco")}))
+    parametros = _parametros()
+    variaveis = criar_variaveis(catalogo, parametros)
+
+    problema = LpProblem("teste_refeicao_pulada", LpMinimize)
+    r1_cobertura(problema, variaveis, catalogo, parametros)
+    r2_vinculo(problema, variaveis, catalogo, parametros)
+
+    assert _resolver(problema) == "Optimal"
+
+    for receita_id in catalogo.receitas:
+        assert variaveis.y[("p1", receita_id, 2, "almoco")].varValue < 1e-6
+
+    # O dia 1 continua normal: a soma ainda fecha em 1.
+    total_dia_1 = sum(
+        variaveis.y[("p1", receita_id, 1, "almoco")].varValue for receita_id in catalogo.receitas
+    )
+    assert abs(total_dia_1 - 1.0) < 1e-6

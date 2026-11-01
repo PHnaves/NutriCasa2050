@@ -24,10 +24,23 @@ def r1_cobertura(
     (b) Se sair: a soma poderia ficar em zero sempre que qualquer prato
     custasse mais que zero, e a solucao "mais barata" seria a familia nao
     comer — o que esvazia a funcao objetivo como medida de custo de vida.
+
+    Excecao deliberada: (dia, refeicao) em catalogo.refeicoes_puladas
+    (S4-01/S5-06 — "ninguem jantou") fica de fora da soma == 1 e a
+    fracao servida e forcada a zero para todo membro/receita — "essa
+    refeicao nao aconteceu" tambem para o modelo OTIMIZADO, nao so para
+    os baselines heuristicos.
     """
     for membro_id in catalogo.membros:
         for dia in parametros.dias:
             for refeicao in parametros.refeicoes:
+                if (dia, refeicao) in catalogo.refeicoes_puladas:
+                    for receita_id in catalogo.receitas:
+                        problema += (
+                            variaveis.y[(membro_id, receita_id, dia, refeicao)] == 0,
+                            f"R1_refeicao_pulada_{membro_id}_{receita_id}_{dia}_{refeicao}",
+                        )
+                    continue
                 problema += (
                     lpSum(
                         variaveis.y[(membro_id, receita_id, dia, refeicao)]

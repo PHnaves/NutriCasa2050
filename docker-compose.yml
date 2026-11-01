@@ -61,7 +61,7 @@ services:
       - ./data:/app/data
       # Banco de TESTE, em volume nomeado separado.
       - database-test:/app/var-test
-    command: sh -c "ruff check src tests && pytest"
+    command: sh -c "ruff check src tests app.py && pytest"
     profiles:
       - tools
 

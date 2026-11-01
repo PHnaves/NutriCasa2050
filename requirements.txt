@@ -4,3 +4,4 @@
 streamlit>=1.40
 pulp>=2.9
 pandas>=2.2
+matplotlib>=3.8

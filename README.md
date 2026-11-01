@@ -15,6 +15,19 @@ docker compose up --build      # http://localhost:8501
 Sem Docker, ou para entender cada passo, veja o guia completo em
 [docs/RODANDO.md](docs/RODANDO.md).
 
+### Rodar a versão publicada, sem clonar o projeto
+
+Toda vez que uma versão é marcada (`git tag vX.Y && git push --tags`), o
+workflow `.github/workflows/publicar.yml` publica a imagem no GitHub
+Container Registry — um comando roda o projeto inteiro, sem depender de
+nenhum site continuar no ar:
+
+```bash
+docker run -p 8501:8501 ghcr.io/phnaves/nutricasa2050:latest
+```
+
+Abre em http://localhost:8501, igual ao `docker compose up`.
+
 ## Documentação
 
 - [docs/RODANDO.md](docs/RODANDO.md) — como rodar o projeto, com e sem Docker.
@@ -23,6 +36,8 @@ Sem Docker, ou para entender cada passo, veja o guia completo em
 - [docs/formulacao.md](docs/formulacao.md) — a formulação matemática do
   problema de otimização: conjuntos, parâmetros, variáveis, função objetivo
   e as doze restrições.
+- [docs/resultados.md](docs/resultados.md) — os números e achados de cada
+  sprint: desempenho, preço-sombra, redução de desperdício, economia mensal.
 
 ## Estrutura
 

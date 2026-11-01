@@ -74,11 +74,10 @@ class Catalogo:
     nutrientes: dict[tuple[str, str], float]
     lotes: dict[str, Lote]
     membros: dict[str, Membro]
-    # (dia, refeicao) marcados por simulacao.cenarios.pular_refeicoes (S4-01).
-    # So os baselines heuristicos (S4-02/03) leem isto — o solver (R1) exige
-    # uma porcao completa em toda refeicao do horizonte, e nao tem como
-    # pular uma so para um cenario especifico sem reescrever a restricao;
-    # e uma simplificacao assumida e documentada, nao um bug.
+    # (dia, refeicao) marcados por simulacao.cenarios.pular_refeicoes
+    # (S4-01) ou pelo botao de demo "ninguem jantou" (S5-06). R1
+    # (restricoes.py) forca a fracao servida a zero nessas refeicoes
+    # para todo membro — ninguem come, em nenhuma estrategia.
     refeicoes_puladas: frozenset[tuple[int, str]] = frozenset()
     # ids de ingrediente marcados por simulacao.cenarios.esquecer_itens
     # (S4-01). O solver ja evita compra-los sozinho (o preco fica
