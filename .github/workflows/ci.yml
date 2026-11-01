@@ -93,6 +93,12 @@ jobs:
           print("smoke test ok")
           PY
 
+      - name: O modelo de otimizacao resolve DENTRO do container
+        # Complementa o passo acima: alem do CBC "pelado" funcionar, prova
+        # que o nosso modelo completo (variaveis + restricoes + objetivo)
+        # tambem resolve na imagem publicada.
+        run: docker run --rm nutricasa2050:ci python -m nutricasa2050.otimizacao.solver --smoke
+
       - name: O container sobe e responde
         run: |
           docker run -d --name nutricasa2050-ci -p 8501:8501 nutricasa2050:ci
