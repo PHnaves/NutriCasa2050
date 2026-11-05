@@ -47,9 +47,15 @@ class Membro:
     fator_porcao: float
     tags_bloqueadas: frozenset[str]
     faixas: dict[str, Faixa]
+    # As tags de receitas.csv sao de dois tipos: "tem algo" (alto_sodio) e
+    # "NAO tem algo" (sem_gluten, sem_lactose, vegetariano). Bloquear serve
+    # para o primeiro tipo (o idoso bloqueia alto_sodio); para o segundo e
+    # preciso EXIGIR a tag — um celiaco so come receitas marcadas sem_gluten.
+    # (Sprint 6: o botao "Filho celiaco" bloqueava sem_gluten, o contrario.)
+    tags_exigidas: frozenset[str] = frozenset()
 
     def pode_comer(self, receita: Receita) -> bool:
-        return not (self.tags_bloqueadas & receita.tags)
+        return not (self.tags_bloqueadas & receita.tags) and self.tags_exigidas <= receita.tags
 
 
 @dataclass(frozen=True)

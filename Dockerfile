@@ -39,6 +39,8 @@ RUN pip install -e . --no-deps
 
 COPY data/ ./data/
 COPY app.py ./
+# Tema com as cores da logo (S5-07) — sem isto a imagem usava o tema padrao.
+COPY .streamlit/ ./.streamlit/
 COPY tests/ ./tests/
 
 # Pastas onde os DOIS bancos SQLite vivem. Sao os pontos de montagem dos
@@ -46,6 +48,10 @@ COPY tests/ ./tests/
 #   /app/var       -> banco principal
 #   /app/var-test  -> banco de teste
 RUN mkdir -p /app/var /app/var-test
+
+# Resultados publicados da Monte Carlo (aba "Resultados da simulacao").
+# Num volume nomeado NOVO o Docker copia este arquivo para dentro dele.
+COPY var/results.db ./var/results.db
 
 EXPOSE 8501
 

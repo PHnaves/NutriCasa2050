@@ -1,7 +1,15 @@
 # Dependencias necessarias para RODAR o app.
 # Ferramentas de teste/lint ficam no requirements-dev.txt.
+#
+# Versoes FIXADAS no Sprint 6 (card S6-07, congelamento): sao as versoes com
+# que os 184 testes e a rodada Monte Carlo final passaram. Atencao especial
+# ao PuLP: a 4.0 remove o PULP_CBC_CMD (o CBC embutido que o projeto usa) —
+# subir de versao exige trocar _escolher_solver (otimizacao/solver.py).
+#
+# Este arquivo tambem e o que o Streamlit Community Cloud instala na
+# hospedagem (docs/HOSPEDAGEM.md).
 
-streamlit>=1.40
-pulp>=2.9
-pandas>=2.2
-matplotlib>=3.8
+streamlit==1.65.0
+pulp==3.3.2
+pandas==2.3.3
+matplotlib==3.10.9

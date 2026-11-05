@@ -12,9 +12,16 @@ Feito em Python com programação linear inteira mista
 ([PuLP](https://coin-or.github.io/pulp/) + solver CBC), interface em
 Streamlit e resultados guardados em SQLite.
 
-> **App publicado:** ainda não há link público. A publicação no Streamlit
-> Cloud depende de autorização da coordenação para tornar o repositório
-> público (card S5-08). O caminho garantido é a imagem Docker abaixo.
+> **App publicado:** o link entra aqui depois do deploy no Streamlit
+> Community Cloud. O repositório já está pronto para isso e funciona mesmo
+> com repositório privado: o passo a passo está em
+> [docs/HOSPEDAGEM.md](docs/HOSPEDAGEM.md). Também dá para hospedar com a
+> imagem Docker abaixo.
+
+**Em números** (100 semanas simuladas, [docs/resultados.md](docs/resultados.md)):
+**77% menos desperdício** que uma família que compra sempre a mesma lista;
+seguir a dieta prescrita custa cerca de **R$ 174 a mais por semana**; a regra
+nutricional que a realidade mais atropela é a **fibra do idoso**.
 
 ## Como rodar
 
@@ -91,7 +98,7 @@ data/                        dados de entrada (ingredientes, receitas, matriz A,
 tests/                       unidade/ e integracao/ (pytest)
 notebooks/                   00_stigler (protótipo) e 01_analise (todos os gráficos e consultas)
 docs/                        formulação, relatório, resultados, guias
-var/  var-test/              bancos SQLite (arquivos .db não vão para o Git)
+var/  var-test/              bancos SQLite (.db fora do Git, exceto var/results.db, os resultados publicados)
 figures/                     gráficos gerados (não vão para o Git)
 ```
 
@@ -133,6 +140,12 @@ O NutriCasa acrescenta **três dimensões** que o problema original não tinha:
 - [docs/formulacao.md](docs/formulacao.md) — a formulação matemática completa
   (conjuntos, variáveis, objetivo, as 12 restrições) como foi implementada.
 - [docs/relatorio.md](docs/relatorio.md) — relatório final.
+- [docs/HOSPEDAGEM.md](docs/HOSPEDAGEM.md) — como publicar o app (Streamlit
+  Cloud, Docker, rede local) e o checklist do congelamento.
+- [docs/roteiro_pitch.md](docs/roteiro_pitch.md) — roteiro do vídeo pitch
+  (duas pessoas, cerca de 3 min).
+- [docs/preparacao_defesa.md](docs/preparacao_defesa.md) — as perguntas da
+  sabatina, com a resposta e onde está a prova de cada uma.
 - [docs/resultados.md](docs/resultados.md) — números e achados de cada sprint:
   desempenho, redução de desperdício, economia, preço da prescrição.
 - [docs/RODANDO.md](docs/RODANDO.md) — como rodar, com e sem Docker.
@@ -167,7 +180,8 @@ Alguns testes usam o catálogo real completo e levam alguns segundos cada
 ### Reproduzir os números do projeto
 
 ```bash
-make resultados              # Monte Carlo: 500 cenários × 3 estratégias → banco principal
+make resultados              # Monte Carlo: 100 cenários × 3 estratégias, timeout 30 s (~55 min) → banco principal
+make publicar-resultados     # copia para var/results.db, o banco lido pelo app hospedado
 pip install jupyter          # só para abrir/rodar o notebook; não faz parte do requirements
 jupyter nbconvert --to notebook --execute notebooks/01_analise.ipynb   # todos os gráficos e consultas
 ```

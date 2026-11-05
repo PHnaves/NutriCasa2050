@@ -54,7 +54,7 @@ nada é "chutado" dentro do modelo.
 | `preco[i]`, `tam[i]` | `ingredientes.csv` | preço e tamanho de **uma embalagem** de `i`; `pu[i] = preco[i]/tam[i]` é o preço por unidade |
 | `val[i]` | `ingredientes.csv` (`validade_dias`) | validade típica de `i` (dias) |
 | `fp[p]` | perfil (`fator_porcao`) | fator de porção do membro `p` (1,0 adulto; 0,6 criança; 0,8 idoso) |
-| `perm[p,r] ∈ {0,1}` | perfil × receita | 1 se nenhuma `tag_dieta` de `r` está em `tags_bloqueadas` de `p` (`Membro.pode_comer`) |
+| `perm[p,r] ∈ {0,1}` | perfil × receita | 1 se nenhuma `tag_dieta` de `r` está em `tags_bloqueadas` de `p` **e** todas as `tags_exigidas` de `p` estão em `r` (`Membro.pode_comer`) |
 | `min[p,n]`, `max[p,n]`, `alvo[p,n]` | perfil (`faixas`) | faixa e alvo diários do nutriente `n` para o membro `p` |
 | `tempo[r]`, `pref[r]` | receitas | minutos de preparo e nota de preferência (0 a 1) |
 | `q0[l]`, `ing[l]`, `venc[l]`, `chega[l]` | estoque / lotes de compra | quantidade inicial, ingrediente, dia de vencimento e (só lotes de compra) dia de chegada |
@@ -166,6 +166,12 @@ possível **e mostra onde e quanto precisou ceder**.
 
 **R6 — Restrição individual** (`r6_restricao_alimentar_individual`).
 `y[p,r,d,m] = 0` se `perm[p,r] = 0`.
+As tags dos dados são de dois tipos, e `perm` trata os dois: **bloqueadas**
+(a receita *tem* algo, como `alto_sodio`, que o idoso bloqueia) e
+**exigidas** (a receita *não tem* algo, como `sem_gluten`; um celíaco só come
+receitas com essa tag, via `Membro.tags_exigidas`). Até o Sprint 6 só
+existiam as bloqueadas, e o botão "Filho celíaco" bloqueava `sem_gluten`:
+proibia justamente os pratos seguros e deixava o modelo inviável.
 *(a)* Um membro não recebe prato com tag que lhe é proibida — mas o prato
 continua podendo ser cozinhado para os outros (é isso que permite "o filho é
 celíaco" sem obrigar a casa toda a comer sem glúten).

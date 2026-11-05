@@ -14,12 +14,15 @@ env
 .env.local
 
 # ----- Bancos (vem dos volumes, nunca da imagem) -----
-var/
+var/*
 var-test/
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
+# ...exceto os resultados publicados da Monte Carlo, lidos pela aba
+# "Resultados da simulacao" do app (Sprint 6, docs/HOSPEDAGEM.md).
+!var/results.db
 
 # ----- Caches -----
 __pycache__
