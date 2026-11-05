@@ -88,7 +88,7 @@ def montar_barra_lateral(catalogo: Catalogo) -> tuple[Parametros, list[str]]:
     pessoas = st.sidebar.multiselect("Membros da familia", todos, default=todos)
 
     st.sidebar.header("Parametros")
-    orcamento = st.sidebar.slider("Orcamento semanal (R$)", 50.0, 1000.0, 300.0, step=10.0)
+    orcamento = st.sidebar.slider("Orcamento semanal (R$)", 50.0, 1000.0, 500.0, step=10.0)
     tempo_por_dia = st.sidebar.slider("Tempo de cozinha por dia (min)", 10, 180, 60, step=5)
 
     st.sidebar.header("Pesos do objetivo")
@@ -386,7 +386,9 @@ def main() -> None:
     with st.spinner("Resolvendo..."):
         solucao = resolver(catalogo, parametros)
 
-    if solucao.status not in ("Optimal", "Not Solved"):
+    # "Not Solved" SEM cardapio = tempo esgotado antes de achar qualquer
+    # solucao inteira (solver.solucao_e_inteira); nao ha nada para mostrar.
+    if solucao.status not in ("Optimal", "Not Solved") or not solucao.cardapio:
         st.error(descrever_status(solucao.status))
         return
     if solucao.status == "Not Solved":

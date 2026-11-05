@@ -1,5 +1,54 @@
 # Resultados dos Sprints 3 e 4
 
+> ## NUMEROS REVALIDADOS (Sprint 6, rodada de 100 cenarios)
+>
+> Rodada real: 100 cenarios x 3 estrategias, horizonte 5, 3 refeicoes/dia,
+> orcamento 500, tempo limite 30 s, 0 falhas, 3222 s (54 min). Solucoes
+> nao inteiras agora sao descartadas. Resultados (substituem os de S4-06):
+>
+> | Numero | Valor |
+> |---|---|
+> | Desperdicio medio (R$/semana) | otimizado 578,30 · humano 2.526,79 · **guloso 92,13** |
+> | Reducao vs. familia normal (humano) | **77,1%** |
+> | Economia mensal (otimizado vs humano, IC 95%) | R$ 9.136 [4.649 ; 13.623] |
+> | Preco da prescricao (1 cenario base) | +R$ 174,40/semana e +294 min de cozinha |
+> | Folga mais frequente | fibra do idoso hipertenso (1173 ocorrencias); carboidrato da crianca (1108); proteina dos adultos |
+>
+> **Ressalvas honestas.** (1) O guloso desperdiça MENOS que o otimizado
+> (92 contra 578): o otimizado paga desperdicio para atender nutricao (folga
+> pesa 1000x) e, com 30 s, fica longe do otimo (vide tabela de timeout acima);
+> a vantagem do otimizado nao e desperdicio absoluto contra todos, e sim
+> contra a familia normal e em aderencia nutricional. (2) O "preco da
+> prescricao" vem de solucoes com tempo limite e deve ser lido como ordem de
+> grandeza, nao valor exato. (3) A economia mensal e a diferenca de custo de
+> compra + desperdicio extrapolada de 5 dias para 30 (x30/7), com tudo o que
+> isso implica. As secoes S4-05/S4-06 abaixo seguem como registro historico.
+
+> ## CORRECAO (Sprint 6) — leia antes das secoes S4-05 e S4-06
+>
+> Os numeros do S4-05/S4-06 abaixo (91,0% de reducao, R$ 12.635/mes, preco
+> da prescricao, guloso vs. otimizado) foram calculados tratando o status
+> "Not Solved" do CBC como "melhor solucao viavel encontrada". **Isso estava
+> errado.** Quando o tempo limite estoura antes de qualquer solucao
+> *inteira*, o PuLP devolve os valores da **relaxacao linear** (x = 0,3
+> "prato meio cozinhado", 0,6 embalagem comprada). Eles satisfazem R1 e as
+> demais restricoes lineares, entao a checagem que fiz na epoca (soma das
+> porcoes) nao detectava. Medido agora no catalogo real (horizonte 5):
+>
+> | orcamento | timeout | status | observacao |
+> |---|---|---|---|
+> | 300 | 10 s | Not Solved | sem solucao inteira — **antes era aceito** |
+> | 500 | 10 s | Optimal (13 s) | objetivo 5.255.966 — incumbente ruim |
+> | 500 | 60 s | Optimal (62 s) | objetivo 145.205 — 36x melhor |
+>
+> Duas consequencias: (1) "Optimal" com tempo limite estourado e so a
+> melhor solucao *encontrada*, nao provada otima — a qualidade depende do
+> tempo; (2) cada solve real leva >=10 s, entao 500 cenarios x 1 solve
+> otimizado passam de 1,5 h. **Correcao no codigo:** `solver.resolver` agora
+> checa a integralidade (`solucao_e_inteira`) e devolve solucao vazia se nao
+> for inteira (teste de regressao em `tests/unidade/test_solver.py`).
+> os numeros do S4-06 antigos NAO valem; use os revalidados acima.
+
 Registros que os cards dos Sprints 3 e 4 pedem explicitamente para
 documentar (S3-02, S3-04, S3-08, S4-05, S4-06). Todos os numeros vem de
 rodadas reais do solver nesta maquina (CBC via PuLP). O padrao de
@@ -100,39 +149,38 @@ investigar.
 
 ## S3-08 — MARCO: o coracao anti-desperdicio
 
-Cenario: 1 lote de tomate (3 kg) vencendo no dia 3, 3 receitas que usam
-tomate (salada, molho, tomate assado) e 2 receitas sem tomate (arroz,
-feijao), horizonte de 5 dias, 1 prato por refeicao — exatamente o que o
-card pede ("pelo menos 3 receitas que usam tomate").
+Cenario: 1 lote de tomate (3 kg, R$ 5/kg) vencendo no dia 3, 3 receitas
+que usam tomate (salada, molho, tomate assado — todas LENTAS, 30 min) e 2
+sem tomate (arroz, feijao — RAPIDAS, 10 min), horizonte de 5 dias, 1 prato
+por refeicao.
 
-**Antes (card so cumprido parcialmente, sem R10/termo_desperdicio
-—simulado desligando as duas coisas):** sem a penalidade de desperdicio
-no objetivo, qualquer ordem de pratos e igualmente "otima" — nada
-empurra o tomate para o inicio da semana.
+**Correcao feita no Sprint 6 (achado honesto).** A primeira versao deste
+cenario (S3-08) tinha as receitas de tomate como as mais RAPIDAS. Ao
+zerar o peso do desperdicio para montar o "antes", o cardapio saiu
+IDENTICO — o solver escolhia o tomate so por tempo de preparo, e o teste
+passava sem provar o que dizia provar. O cenario foi refeito para o tomate
+ser a opcao mais lenta: agora a unica razao para gasta-lo e nao deixa-lo
+vencer. O texto anterior dizia que o "antes" tinha sido "simulado"; nao
+tinha sido rodado — agora foi.
 
-**Depois (com R10 + termo_desperdicio, o codigo real deste sprint):**
+| Dia | Com custo de desperdicio (peso 1) | Sem custo de desperdicio (peso 0) |
+|---|---|---|
+| 1 | Salada de tomate | Feijao simples |
+| 2 | Molho de tomate | Arroz simples |
+| 3 | Salada de tomate | Molho de tomate |
+| 4 | Arroz simples | Arroz simples |
+| 5 | Feijao simples | Feijao simples |
+| **Tomate descartado** | **0 kg** | **2 kg** |
 
-| Dia | Prato escolhido pelo solver |
-|---|---|
-| 1 | Salada de tomate |
-| 2 | Molho de tomate |
-| 3 | Salada de tomate |
-| 4 | Arroz simples |
-| 5 | Feijao simples |
+**NINGUEM programou "use o tomate antes do dia 3".** Com o desperdicio
+custando dinheiro, o solver aceita cozinhar tres pratos lentos para nao
+perder o tomate; sem esse custo, ele cozinha o rapido e joga 2 kg fora. A
+unica diferenca entre as duas colunas e um peso no objetivo. Comportamento
+emergente, nao programacao explicita.
 
-Descarte final: **zero**. Custo do objetivo: R$ 8,50 (so o preco do
-tomate que ja estava em estoque, nenhuma compra adicional).
-
-**NINGUEM programou "use o tomate antes do dia 3".** O solver chegou
-nesse cardapio sozinho: comer o tomate nos 3 primeiros dias nao custa
-nada extra (ja estava comprado), enquanto deixar ele vencer custaria o
-preco unitario do tomate inteiro no termo de desperdicio. Minimizar
-custo, nessas condicoes, É minimizar desperdicio — e isso te faz usar
-primeiro o que vence primeiro. Comportamento emergente, nao
-programacao explicita.
-
-Teste de regressao: `tests/integracao/test_coracao.py::test_coracao_antidesperdicio`
-— **nunca deve ser marcado como skip.**
+Testes de regressao (nunca marcar como skip):
+`tests/integracao/test_coracao.py::test_coracao_antidesperdicio` e o
+controle `::test_sem_custo_de_desperdicio_o_tomate_vence`.
 
 # Sprint 4
 

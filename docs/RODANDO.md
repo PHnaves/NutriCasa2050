@@ -6,13 +6,11 @@ mesmo cuida das dependências de sistema). Escolha uma — não precisa das duas
 
 ## 0. Estado atual do projeto
 
-Este projeto ainda está no começo: existem só os arquivos de infraestrutura
-(`Dockerfile`, `docker-compose.yml`, `.env.example`, CI). Ainda **faltam ser
-criados**: `requirements.txt`, `requirements-dev.txt`, `pyproject.toml`, o pacote
-Python dentro de `src/`, `app.py`, os testes em `tests/` e os dados em `data/`.
-Os passos abaixo descrevem como o projeto foi *planejado* para rodar — enquanto
-esses arquivos não existirem, alguns comandos vão falhar por falta de código, não
-por erro de configuração.
+O projeto está completo até o Sprint 5: modelo de otimização, simulação Monte
+Carlo, análise, tela em Streamlit e CI. Os arquivos que este guia menciona
+(`requirements.txt`, `pyproject.toml`, `app.py`, `data/`, `tests/`) existem
+todos. Se um comando falhar, é problema de ambiente (Python, Docker, porta) —
+veja a seção 6.
 
 ## 1. Antes de tudo (vale para os dois caminhos)
 

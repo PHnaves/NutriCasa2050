@@ -126,3 +126,25 @@ def test_monte_carlo_e_reprodutivel(cfg) -> None:
     total_b = _total_custo()
 
     assert total_a == total_b
+
+
+def test_cli_cria_o_schema_num_banco_novo(tmp_path, monkeypatch) -> None:
+    """Regressao: main() nao criava as tabelas, entao `make resultados`
+    num banco que ainda nao existia quebrava com "no such table: cenario"
+    (so apareceu na hora de preparar a rodada completa do Sprint 6)."""
+    caminho = tmp_path / "novo.db"
+    monkeypatch.setenv("NUTRICASA2050_ENVIRONMENT", "test")
+    monkeypatch.setenv("NUTRICASA2050_TEST_DB_URL", f"sqlite:///{caminho}")
+
+    codigo = monte_carlo.main(["--n", "0"])
+
+    assert codigo == 0
+    import sqlite3
+
+    tabelas = {
+        linha[0]
+        for linha in sqlite3.connect(caminho).execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        )
+    }
+    assert {"cenario", "execucao"} <= tabelas

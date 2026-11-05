@@ -7,12 +7,10 @@ from __future__ import annotations
 import math
 from dataclasses import replace
 
-from pulp import LpStatus
-
 from nutricasa2050.dominio import Catalogo, Parametros
 from nutricasa2050.otimizacao.modelo import construir
 from nutricasa2050.otimizacao.objetivo import termo_custo, termo_tempo
-from nutricasa2050.otimizacao.solver import _escolher_solver
+from nutricasa2050.otimizacao.solver import resolver_problema
 from nutricasa2050.persistencia.banco import EngineSQLite, conexao
 
 ESTRATEGIA_OTIMIZADA = "otimizado"
@@ -100,8 +98,7 @@ def preco_da_prescricao(catalogo: Catalogo, parametros: Parametros) -> dict[str,
 
     def _resolver(catalogo_a_usar: Catalogo) -> tuple[float, float]:
         problema, variaveis = construir(catalogo_a_usar, parametros)
-        problema.solve(_escolher_solver(parametros))
-        if LpStatus[problema.status] not in ("Optimal", "Not Solved"):
+        if resolver_problema(problema, parametros) not in ("Optimal", "Not Solved"):
             return (0.0, 0.0)
         custo = termo_custo(variaveis, catalogo_a_usar, parametros).value() or 0.0
         termo_tempo_em_reais = termo_tempo(variaveis, catalogo_a_usar, parametros).value() or 0.0
