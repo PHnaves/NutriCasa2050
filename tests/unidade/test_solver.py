@@ -86,3 +86,28 @@ def test_extracao_ignora_valores_zero() -> None:
     extraido = _extrair_cardapio(variaveis)
 
     assert extraido == {chave_usada: 1.0}
+
+
+def test_solucao_e_inteira_pega_a_relaxacao_linear() -> None:
+    """Regressao do erro do Sprint 4: com tempo limite, o CBC pode devolver
+    os valores da RELAXACAO LINEAR (variavel binaria = 0,3). Isso nao pode
+    passar por cardapio."""
+    from pulp import LpMinimize, LpProblem, LpVariable
+
+    from nutricasa2050.otimizacao.solver import solucao_e_inteira
+
+    problema = LpProblem("t", LpMinimize)
+    x = LpVariable("x", cat="Binary")
+    b = LpVariable("b", lowBound=0, cat="Integer")
+    x.varValue = 1.0
+    b.varValue = 3.0
+    problema += x + b
+    assert solucao_e_inteira(problema) is True
+
+    x.varValue = 0.3
+    assert solucao_e_inteira(problema) is False
+    x.varValue = 1.0
+    b.varValue = 2.6
+    assert solucao_e_inteira(problema) is False
+    b.varValue = None
+    assert solucao_e_inteira(problema) is False

@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import time
 
-from pulp import PULP_CBC_CMD, LpStatus
+from pulp import PULP_CBC_CMD, LpProblem, LpStatus
 
 from nutricasa2050 import config
 from nutricasa2050.dominio import Catalogo, Ingrediente, Lote, Membro, Parametros, Receita, Solucao
@@ -21,9 +21,9 @@ _DESCRICOES_STATUS = {
     "Infeasible": "nao existe cardapio que atenda todas as regras com esses parametros.",
     "Unbounded": "o problema esta mal configurado: o objetivo pode cair sem limite.",
     "Not Solved": (
-        "o solver bateu no tempo limite antes de provar que achou o melhor "
-        "cardapio possivel — mas o que ele encontrou ate ali e usado mesmo "
-        "assim (pode nao ser o otimo; ver card S4-05)."
+        "o solver bateu no tempo limite antes de achar um cardapio inteiro "
+        "e viavel — nenhum resultado confiavel (aumente o tempo limite, "
+        "reduza o horizonte ou afrouxe o orcamento; ver card S4-05)."
     ),
     "Undefined": "o solver nao conseguiu determinar um resultado.",
 }
@@ -31,6 +31,45 @@ _DESCRICOES_STATUS = {
 
 def descrever_status(status: str) -> str:
     return _DESCRICOES_STATUS.get(status, f"status desconhecido do solver: {status!r}.")
+
+
+class ErroDeSolucao(RuntimeError):
+    """O solver terminou sem uma solucao inteira e viavel utilizavel."""
+
+
+TOLERANCIA_INTEIRA = 1e-4
+
+
+def solucao_e_inteira(problema: LpProblem) -> bool:
+    """True se toda variavel binaria/inteira do problema resolvido tem valor
+    inteiro (dentro de uma tolerancia).
+
+    Existe por causa de um erro do Sprint 4 (corrigido no 6): quando o CBC
+    bate no tempo limite SEM ter achado nenhuma solucao inteira, o PuLP
+    ainda devolve valores — mas sao os da RELAXACAO LINEAR (pratos "meio
+    cozinhados", 0,3 embalagem comprada), que satisfazem R1 e as outras
+    restricoes lineares e por isso parecem uma resposta valida. Checar so
+    a soma das porcoes (o que eu fiz na epoca) nao pega isso; checar a
+    integralidade pega.
+    """
+    for variavel in problema.variables():
+        if variavel.cat not in ("Binary", "Integer"):
+            continue
+        valor = variavel.varValue
+        if valor is None or abs(valor - round(valor)) > TOLERANCIA_INTEIRA:
+            return False
+    return True
+
+
+def resolver_problema(problema: LpProblem, parametros: Parametros) -> str:
+    """Resolve `problema` ja montado e devolve o status do PuLP. Levanta
+    ErroDeSolucao se o solver terminou sem uma solucao inteira — nunca
+    devolve em silencio os valores de uma relaxacao linear."""
+    problema.solve(_escolher_solver(parametros))
+    status = LpStatus[problema.status]
+    if status in ("Optimal", "Not Solved") and not solucao_e_inteira(problema):
+        raise ErroDeSolucao(descrever_status("Not Solved"))
+    return status
 
 
 def _escolher_solver(parametros: Parametros) -> PULP_CBC_CMD:
@@ -96,11 +135,15 @@ def resolver(catalogo: Catalogo, parametros: Parametros) -> Solucao:
 
     status = LpStatus[problema.status]
 
-    if status in ("Infeasible", "Unbounded", "Undefined"):
-        # De fato sem solucao valida: nao ha cardapio, porcao, compra,
-        # descarte, estoque ou aderencia para reportar (varValue pode ter
-        # lixo do branch-and-bound de um ramo abandonado, nao confiavel
-        # quando o proprio solver concluiu que a resposta nao existe).
+    sem_solucao = status in ("Infeasible", "Unbounded", "Undefined") or (
+        status in ("Optimal", "Not Solved") and not solucao_e_inteira(problema)
+    )
+    if sem_solucao:
+        # Sem solucao utilizavel: nao ha cardapio, porcao, compra, descarte,
+        # estoque ou aderencia para reportar. Tres casos: o solver concluiu
+        # que a resposta nao existe (varValue e lixo de ramo abandonado), ou
+        # bateu no tempo limite antes de achar qualquer solucao INTEIRA —
+        # ai varValue e a relaxacao linear (ver solucao_e_inteira).
         return Solucao(
             status=status,
             tempo_segundos=tempo_segundos,
@@ -113,13 +156,8 @@ def resolver(catalogo: Catalogo, parametros: Parametros) -> Solucao:
             aderencia=dict(_ADERENCIA_VAZIA),
         )
 
-    # "Optimal" (provado) OU "Not Solved" (bateu no tempo limite, S4-05) —
-    # nos dois casos o CBC so grava um incumbente quando ele e uma solucao
-    # INTEIRA E VIAVEL de verdade (B&B nunca promove um ramo parcial a
-    # incumbente); a diferenca e so se ficou provado que e o melhor
-    # possivel. Extrai normalmente; se o solver realmente nao achou nada
-    # a tempo, varValue fica None em tudo e a extracao (que ja filtra
-    # None) devolve vazio por conta propria, sem precisar de outro caso.
+    # "Optimal" (provado) OU "Not Solved" COM solucao inteira (achou uma
+    # resposta viavel mas nao deu tempo de provar que e a melhor — S4-05).
     valor_objetivo = problema.objective.value()
     if valor_objetivo is None and status == "Optimal":
         # Objetivo sem nenhuma variavel (ex.: nenhum dia de compra no

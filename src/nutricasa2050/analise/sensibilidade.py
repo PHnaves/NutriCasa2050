@@ -27,7 +27,7 @@ from pulp import LpProblem
 
 from nutricasa2050.dominio import Catalogo, Parametros
 from nutricasa2050.otimizacao.modelo import construir
-from nutricasa2050.otimizacao.solver import _escolher_solver
+from nutricasa2050.otimizacao.solver import resolver_problema
 
 
 def extrair_precos_sombra(problema: LpProblem) -> dict[str, float]:
@@ -60,12 +60,12 @@ def preco_sombra_do_orcamento(catalogo: Catalogo, parametros: Parametros) -> flo
     para uma minimizacao e diminuir).
     """
     problema_antes, _ = construir(catalogo, parametros)
-    problema_antes.solve(_escolher_solver(parametros))
+    resolver_problema(problema_antes, parametros)
     valor_antes = _valor_objetivo(problema_antes)
 
     parametros_depois = replace(parametros, orcamento=parametros.orcamento + 1.0)
     problema_depois, _ = construir(catalogo, parametros_depois)
-    problema_depois.solve(_escolher_solver(parametros_depois))
+    resolver_problema(problema_depois, parametros_depois)
     valor_depois = _valor_objetivo(problema_depois)
 
     return valor_depois - valor_antes
@@ -88,7 +88,7 @@ def preco_sombra_por_membro_e_nutriente(
     o catalogo real isso evita dezenas de resolucoes desnecessarias.
     """
     problema_base, _ = construir(catalogo, parametros)
-    problema_base.solve(_escolher_solver(parametros))
+    resolver_problema(problema_base, parametros)
     valor_base = _valor_objetivo(problema_base)
 
     combinacoes = [
@@ -114,7 +114,7 @@ def preco_sombra_por_membro_e_nutriente(
             catalogo_perturbado = replace(catalogo, membros=membros_perturbados)
 
             problema_perturbado, _ = construir(catalogo_perturbado, parametros)
-            problema_perturbado.solve(_escolher_solver(parametros))
+            resolver_problema(problema_perturbado, parametros)
             valor_perturbado = _valor_objetivo(problema_perturbado)
 
             resultado[(m_id, nome, lado)] = valor_perturbado - valor_base

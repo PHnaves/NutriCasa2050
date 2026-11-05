@@ -11,7 +11,13 @@ from dataclasses import asdict
 from nutricasa2050.dados.carga import carregar_catalogo
 from nutricasa2050.dominio import Catalogo, Parametros
 from nutricasa2050.otimizacao.solver import resolver
-from nutricasa2050.persistencia.banco import ConfiguracaoBanco, EngineSQLite, conexao, criar_engine
+from nutricasa2050.persistencia.banco import (
+    ConfiguracaoBanco,
+    EngineSQLite,
+    conexao,
+    criar_engine,
+    criar_schema,
+)
 from nutricasa2050.persistencia.repositorio import gravar_cenario, gravar_resultado_completo
 from nutricasa2050.serializacao import resultado_para_dict
 from nutricasa2050.simulacao.baselines import (
@@ -152,6 +158,9 @@ def main(argv: list[str] | None = None) -> int:
     cfg = _carregar_cfg()
     url = cfg.url_banco_teste if cfg.ambiente == "test" else cfg.url_banco_principal
     engine = criar_engine(cfg, url)
+    # CREATE TABLE IF NOT EXISTS: seguro num banco que ja existe, e sem isso
+    # `make resultados` num banco novo quebra em _proxima_rodada.
+    criar_schema(engine)
 
     catalogo = carregar_catalogo()
     parametros = Parametros(

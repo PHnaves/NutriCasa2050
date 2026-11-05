@@ -9,39 +9,52 @@ fundamental do modelo se perdeu — nao marcar como skip para o CI passar.
 """
 from __future__ import annotations
 
-from nutricasa2050.dominio import Catalogo, Ingrediente, Lote, Membro, Parametros, Receita
+from nutricasa2050.dominio import (
+    Catalogo,
+    Ingrediente,
+    Lote,
+    Membro,
+    Parametros,
+    Pesos,
+    Receita,
+)
 from nutricasa2050.otimizacao.solver import resolver
 
 
 def _catalogo_tomate_vencendo() -> Catalogo:
+    """De proposito, as receitas de tomate sao as MAIS LENTAS (30 min
+    contra 10) — se fossem as mais rapidas, o solver as escolheria so
+    por tempo de preparo e o teste nao provaria nada sobre desperdicio.
+    A unica razao para gastar o tomate e nao deixa-lo vencer.
+    """
     tomate = Ingrediente(
         id="tomate",
         nome="Tomate",
         unidade="kg",
         categoria="hortifruti",
         validade_dias=3,
-        preco_embalagem=1.0,
+        preco_embalagem=5.0,
         tamanho_embalagem=1.0,
     )
     receitas = {
         "salada_de_tomate": Receita(
-            id="salada_de_tomate", nome="Salada de tomate", tempo_min=10,
+            id="salada_de_tomate", nome="Salada de tomate", tempo_min=30,
             tags=frozenset(), preferencia=0.0,
         ),
         "molho_de_tomate": Receita(
-            id="molho_de_tomate", nome="Molho de tomate", tempo_min=15,
+            id="molho_de_tomate", nome="Molho de tomate", tempo_min=30,
             tags=frozenset(), preferencia=0.0,
         ),
         "tomate_assado": Receita(
-            id="tomate_assado", nome="Tomate assado", tempo_min=20,
+            id="tomate_assado", nome="Tomate assado", tempo_min=30,
             tags=frozenset(), preferencia=0.0,
         ),
         "arroz_simples": Receita(
-            id="arroz_simples", nome="Arroz simples", tempo_min=20,
+            id="arroz_simples", nome="Arroz simples", tempo_min=10,
             tags=frozenset(), preferencia=0.0,
         ),
         "feijao_simples": Receita(
-            id="feijao_simples", nome="Feijao simples", tempo_min=30,
+            id="feijao_simples", nome="Feijao simples", tempo_min=10,
             tags=frozenset(), preferencia=0.0,
         ),
     }
@@ -86,3 +99,25 @@ def test_coracao_antidesperdicio() -> None:
     assert all(dia <= 3 for dia in dias_com_tomate)
     # Nada do tomate sobra para ser jogado fora.
     assert sum(solucao.descartes.values()) < 1e-6
+
+
+def test_sem_custo_de_desperdicio_o_tomate_vence() -> None:
+    """Controle do teste acima: com o peso do desperdicio ZERO, usar o
+    tomate (receitas lentas) nao compensa mais — a familia cozinha o
+    rapido e o tomate vira lixo. E isso que prova que o comportamento
+    do teste anterior vem do custo do desperdicio, e nao de outro termo
+    do objetivo (tempo, preferencia) puxando as mesmas receitas."""
+    catalogo = _catalogo_tomate_vencendo()
+    parametros = Parametros(
+        horizonte=5,
+        refeicoes_por_dia=1,
+        pratos_por_refeicao=1,
+        orcamento=0.0,
+        dias_compra=(),
+        pesos=Pesos(desperdicio=0.0),
+    )
+
+    solucao = resolver(catalogo, parametros)
+
+    assert solucao.status == "Optimal"
+    assert sum(solucao.descartes.values()) > 0.5
