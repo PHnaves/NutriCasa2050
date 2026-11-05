@@ -152,7 +152,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--n", type=int, default=500, help="numero de cenarios (padrao: 500)")
     parser.add_argument("--semente-inicial", type=int, default=0)
     parser.add_argument("--horizonte", type=int, default=5)
-    parser.add_argument("--orcamento", type=float, default=500.0)
+    parser.add_argument("--orcamento", type=float, default=900.0)
     args = parser.parse_args(argv)
 
     cfg = _carregar_cfg()

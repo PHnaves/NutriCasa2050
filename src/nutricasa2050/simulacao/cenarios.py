@@ -101,18 +101,15 @@ def pular_refeicoes(catalogo: Catalogo, cenario: Cenario) -> Catalogo:
 
 
 def esquecer_itens(catalogo: Catalogo, cenario: Cenario) -> Catalogo:
-    """Remove alguns itens da compra planejada — dois sinais, um para
-    cada tipo de estrategia:
+    """Remove alguns itens da compra planejada: marca os ids em
+    Catalogo.itens_esquecidos, que as TRES estrategias respeitam — os
+    baselines (S4-02/03) pulam o item na compra habitual, e o solver nao
+    pode compra-lo (variaveis.criar_variaveis fixa b = 0).
 
-    1. Catalogo.itens_esquecidos (ids): o que os baselines (S4-02/03)
-       olham. Eles NAO decidem compra pelo preco, so pela quantidade
-       habitual — sem isso, comprariam a quantidade normal mesmo a um
-       preco absurdo, e um descarte depois viraria um valor em reais
-       sem sentido.
-    2. Preco proibitivo (x1000, em vez de zerar o tamanho da embalagem
-       — zerar quebraria Ingrediente.preco_unitario, divisao por zero,
-       usado em termo_desperdicio e na serializacao): o que faz o
-       SOLVER nunca escolher comprar aquele item esta semana.
+    O preco NAO muda. Ate o Sprint 6 o solver era impedido de comprar com
+    um preco x1000 — e esse mesmo preco valorava o descarte do estoque
+    inicial do item, inflando o desperdicio de todas as estrategias (88%
+    do desperdicio medido era esse artefato; ver docs/resultados.md).
     """
     if cenario.itens_esquecidos <= 0 or not catalogo.ingredientes:
         return catalogo
@@ -120,16 +117,8 @@ def esquecer_itens(catalogo: Catalogo, cenario: Cenario) -> Catalogo:
     candidatos = sorted(catalogo.ingredientes)
     quantidade = min(cenario.itens_esquecidos, len(candidatos))
     esquecidos = rng.sample(candidatos, quantidade)
-
-    ingredientes = dict(catalogo.ingredientes)
-    for ingrediente_id in esquecidos:
-        ingrediente = ingredientes[ingrediente_id]
-        ingredientes[ingrediente_id] = replace(
-            ingrediente, preco_embalagem=ingrediente.preco_embalagem * 1000
-        )
     return replace(
         catalogo,
-        ingredientes=ingredientes,
         itens_esquecidos=catalogo.itens_esquecidos | frozenset(esquecidos),
     )
 

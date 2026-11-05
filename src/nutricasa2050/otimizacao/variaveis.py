@@ -59,9 +59,17 @@ def criar_variaveis(catalogo: Catalogo, parametros: Parametros) -> Variaveis:
         for refeicao in refeicoes
     }
 
+    # Item "esquecido" na compra (Monte Carlo, S4-01): nao pode ser comprado
+    # nesta semana (upBound=0). Ate o Sprint 6 isso era feito multiplicando
+    # o PRECO por 1000 — e o mesmo preco inflado valorava o descarte do
+    # estoque inicial daquele item, inflando o desperdicio de todas as
+    # estrategias (ver docs/resultados.md, correcao de precos).
     b = {
         (ingrediente_id, dia): LpVariable(
-            f"b_{ingrediente_id}_{dia}", lowBound=0, cat="Integer"
+            f"b_{ingrediente_id}_{dia}",
+            lowBound=0,
+            upBound=0 if ingrediente_id in catalogo.itens_esquecidos else None,
+            cat="Integer",
         )
         for ingrediente_id in catalogo.ingredientes
         for dia in parametros.dias_compra

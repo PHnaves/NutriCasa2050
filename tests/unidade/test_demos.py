@@ -5,6 +5,8 @@ demonstracao morre na frente do visitante.
 """
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 from apoio_catalogo import construir_catalogo, ingrediente, lote, membro, receita
 
@@ -45,6 +47,27 @@ def test_demo_celiaco_bloqueia_so_a_crianca() -> None:
     assert "sem_gluten" in catalogo_depois.membros["crianca_8_anos"].tags_exigidas
     assert "sem_gluten" not in catalogo_depois.membros["adulto"].tags_exigidas
     assert "sem_gluten" not in catalogo_depois.membros["idoso_hipertenso"].tags_exigidas
+
+
+def test_aplicar_imprevisto_escolhe_a_demo_certa() -> None:
+    from app import SEM_IMPREVISTO, aplicar_imprevisto
+
+    catalogo = carregar_catalogo()
+    parametros = Parametros(horizonte=5, refeicoes_por_dia=3, orcamento=500.0, dias_compra=(1,))
+
+    assert aplicar_imprevisto(catalogo, parametros, SEM_IMPREVISTO) == (catalogo, parametros)
+    _, menos_dinheiro = aplicar_imprevisto(catalogo, parametros, "Orçamento −30%")
+    assert menos_dinheiro.orcamento == pytest.approx(350.0)
+    com_visita, _ = aplicar_imprevisto(catalogo, parametros, "Chegou visita")
+    assert len(com_visita.membros) == len(catalogo.membros) + 1
+    celiaco, _ = aplicar_imprevisto(catalogo, parametros, "Filho celíaco")
+    assert "sem_gluten" in celiaco.membros["crianca_8_anos"].tags_exigidas
+
+    # sem a crianca em casa, "Filho celiaco" nao tem em quem aplicar: nada muda
+    so_adultos = dataclasses.replace(
+        catalogo, membros={"adulto_ativo": catalogo.membros["adulto_ativo"]}
+    )
+    assert aplicar_imprevisto(so_adultos, parametros, "Filho celíaco")[0] == so_adultos
 
 
 def test_celiaco_so_come_receita_marcada_sem_gluten() -> None:
@@ -121,12 +144,12 @@ def test_demo_afrouxar_sodio_sobe_o_teto() -> None:
 def test_todos_os_cinco_cenarios_sao_viaveis() -> None:
     """TESTE IMPORTANTE: se um botao der Infeasible na feira, a
     demonstracao morre na frente do visitante. Catalogo real e OS MESMOS
-    parametros padrao do app (5 dias, R$ 500) — com horizonte 3 o bug do
+    parametros padrao do app (5 dias, R$ 900) — com horizonte 3 o bug do
     celiaco (Sprint 6) passava despercebido. Exige cardapio nao vazio:
     "Not Solved" sem solucao inteira tambem mata a demo."""
     catalogo_base = carregar_catalogo()
     parametros_base = Parametros(
-        horizonte=5, refeicoes_por_dia=3, orcamento=500.0, dias_compra=(1,)
+        horizonte=5, refeicoes_por_dia=3, orcamento=900.0, dias_compra=(1,)
     )
 
     cenarios = {

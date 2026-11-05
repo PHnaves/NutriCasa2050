@@ -5,3 +5,7 @@ backgroundColor = "#FDFDFC"
 secondaryBackgroundColor = "#F2EFE9"
 textColor = "#2B2B28"
 font = "sans serif"
+
+# Esconde o botao "Deploy" e o menu de desenvolvedor para quem visita o app.
+[client]
+toolbarMode = "viewer"

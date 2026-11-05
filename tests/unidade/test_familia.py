@@ -131,9 +131,13 @@ def test_tempo_de_solucao_abaixo_de_trinta_segundos() -> None:
     30s para 10s (config.py) foi suficiente por si so para este cenario
     especifico (~15,3s, Optimal de verdade, nao so um incumbente) — a
     alavanca extra de reduzir o horizonte so foi necessaria para a
-    Monte Carlo de 500 cenarios (ver docs/resultados.md, secao S4-05)."""
+    Monte Carlo de 500 cenarios (ver docs/resultados.md, secao S4-05).
+
+    Orcamento R$ 900 desde o Sprint 6: com os precos reais do Atacadao a
+    semana custa R$ 440-550, e com R$ 500 o solver nao acha cardapio
+    inteiro no tempo limite (medido; ver docs/resultados.md, topo)."""
     catalogo = carregar_catalogo()
-    parametros = Parametros(horizonte=7, refeicoes_por_dia=3, orcamento=500.0, dias_compra=(1,))
+    parametros = Parametros(horizonte=7, refeicoes_por_dia=3, orcamento=900.0, dias_compra=(1,))
 
     solucao = resolver(catalogo, parametros)
 

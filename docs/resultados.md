@@ -1,5 +1,42 @@
 # Resultados dos Sprints 3, 4 e 6
 
+> ## NÚMEROS FINAIS (Sprint 6) — preços do Atacadão, artefato corrigido
+>
+> **Rodada oficial** (`var/results.db`, lida pelo app): 100 cenários × 3
+> estratégias, horizonte 5, 3 refeições/dia, orçamento R$ 900, tempo limite
+> 30 s, preços do Atacadão coletados em 05/11/2026 (`data/precos_coletados.csv`),
+> 0 falhas, ~55 min.
+>
+> | Número | Valor |
+> |---|---|
+> | Desperdício médio (R$/semana) | NutriCasa 122,88 · família normal 338,00 · guloso 119,55 |
+> | Compras médias (R$/semana) | NutriCasa 520,35 · família normal e guloso 808,76 |
+> | **Redução de desperdício vs. família normal** | **63,7%** |
+> | Economia mensal (compras + desperdício, IC 95%) | R$ 2.158 [2.097 ; 2.219] |
+> | Preço da prescrição (cenário base, R$ 900, 30 s) | +R$ 332,54/semana e +301 min de cozinha |
+> | Regra mais atropelada | fibra do idoso hipertenso (1181); carboidrato da criança (1106); proteína dos adultos |
+>
+> **Leitura.** O guloso praticamente empata em desperdício (R$ 119,55 contra
+> R$ 122,88), mas ignora a dieta e usa a compra habitual. O NutriCasa chega
+> ao mesmo desperdício cumprindo as faixas nutricionais e comprando menos.
+>
+> **Duas correções nesta rodada.**
+>
+> 1. **Preços reais.** Os preços de `data/ingredientes.csv` foram trocados
+>    pelos do Atacadão (42 de 50 coletados; 8 sem oferta no dia ficaram
+>    como estimativa). Com eles a semana da família custa R$ 440–550, e o
+>    orçamento de R$ 500 deixou de ter solução no tempo limite (medido:
+>    R$ 500 sem cardápio; R$ 700 e R$ 900 com a mesma solução; R$ 700 −30%
+>    sem cardápio). Por isso o padrão do app e da simulação passou a R$ 900.
+> 2. **Artefato do "item esquecido".** A simulação impedia o solver de
+>    comprar um item esquecido multiplicando o preço por 1000, e esse preço
+>    também valorava o descarte do estoque inicial daquele item. Medido na
+>    rodada com o artefato: 88% do desperdício do NutriCasa (R$ 850 de
+>    R$ 970) e 89% do da família normal (R$ 2.691 de R$ 3.026) eram isso.
+>    Agora o item é bloqueado direto na variável de compra (`b = 0`) e o
+>    preço fica real. **Os 77,1% da seção abaixo também tinham esse
+>    artefato** e não valem mais.
+
 > ## Sprint 6 — o que mais foi corrigido ao preparar a hospedagem
 >
 > Rodando o app inteiro com os parametros padrao (Streamlit AppTest, novo
@@ -22,7 +59,7 @@
 > cache. O card S5-06 pedia menos de 10 s por botao: o primeiro clique leva
 > ~13 s, os repetidos sao instantaneos.
 
-> ## NUMEROS REVALIDADOS (Sprint 6, rodada de 100 cenarios)
+> ## [SUPERADO] Números da primeira revalidação (Sprint 6, preços antigos, com o artefato do item esquecido)
 >
 > Rodada real: 100 cenarios x 3 estrategias, horizonte 5, 3 refeicoes/dia,
 > orcamento 500, tempo limite 30 s, 0 falhas, 3222 s (54 min). Solucoes

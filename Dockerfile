@@ -38,7 +38,8 @@ COPY src/ ./src/
 RUN pip install -e . --no-deps
 
 COPY data/ ./data/
-COPY app.py ./
+COPY app.py logo-horizontal-nutricasa.png ./
+COPY assets/ ./assets/
 # Tema com as cores da logo (S5-07) — sem isto a imagem usava o tema padrao.
 COPY .streamlit/ ./.streamlit/
 COPY tests/ ./tests/

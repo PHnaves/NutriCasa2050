@@ -1,0 +1,51 @@
+id,ingrediente,origem,produto,preco_embalagem,tamanho_embalagem,unidade,data_coleta,link
+1,Arroz branco,Atacadão,Arroz Bulnez Agulhinha Tipo 1 1kg,3.99,1,kg,2026-11-05,https://secure.atacadao.com.br/arroz-bulnez-agulhinha-tipo-1-14109/p
+2,Feijão carioca,Atacadão,Feijão Carioca Bulnez Tipo 1 1kg,7.89,1,kg,2026-11-05,https://secure.atacadao.com.br/feijao-carioca-bulnez-tipo-1-13759/p
+3,Macarrão espaguete,Atacadão,Macarrão com Ovos Bulnez Espaguete 500g,1.99,0.5,kg,2026-11-05,https://secure.atacadao.com.br/macarrao-com-ovos-bulnez-espaguete-13217/p
+4,Farinha de trigo,Atacadão,Farinha de Trigo Nita Para Pizza 5kg,13.99,5,kg,2026-11-05,https://secure.atacadao.com.br/farinha-de-trigo-nita-para-pizza-pacote-com-5kg-26744/p
+5,Ovo,Atacadão,Ovo Branco Grande 12 un,7.99,12,unidade,2026-11-05,https://secure.atacadao.com.br/ovo-branco-grande-11675/p
+6,Leite integral,Atacadão,Leite Longa Vida Bulnez Integral 1L,5.39,1,litro,2026-11-05,https://secure.atacadao.com.br/leite-longa-vida-bulnez-integral-14214/p
+7,Manteiga,Atacadão,Manteiga Tourinho Sem sal 200g,8.97,0.2,kg,2026-11-05,https://secure.atacadao.com.br/manteiga-tourinho-sem-sal-tablete-com-200g-67276/p
+8,Queijo mussarela,Atacadão,Queijo Mussarela Fatiado Soberano quilo,49.90,1,kg,2026-11-05,https://secure.atacadao.com.br/queijo-mussarela-fatiado-soberano-85615/p
+9,Peito de frango,Atacadão,Filé de Peito de Frango Resfriado Preço por quilo,20.99,1,kg,2026-11-05,https://secure.atacadao.com.br/file-de-peito-de-frango-resfriado-85344/p
+10,Carne moída (acém),Atacadão,Carne Bovina Moída Acém Reserva Resfriada quilo,49.99,1,kg,2026-11-05,https://secure.atacadao.com.br/carne-bovina-moida-acem-reserva-resfriada-98330/p
+11,Cebola,Atacadão,Cebola Quilo,6.99,1,kg,2026-11-05,https://secure.atacadao.com.br/cebola-quilo-14692/p
+12,Alho,Atacadão,Alho a granel Quilo,18.90,1,kg,2026-11-05,https://secure.atacadao.com.br/alho-a-granel-21933/p
+13,Tomate,Atacadão,Tomate Salada Quilo,17.90,1,kg,2026-11-05,https://secure.atacadao.com.br/tomate-salada-1688/p
+14,Cenoura,Atacadão,Cenoura Quilo,3.98,1,kg,2026-11-05,https://secure.atacadao.com.br/cenoura-quilo-1920/p
+15,Batata inglesa,Atacadão,Batata Lavada Quilo,5.98,1,kg,2026-11-05,https://secure.atacadao.com.br/batata-lavada-quilo-14691/p
+16,Alface crespa,estimativa,sem oferta disponível no Atacadão na data da coleta; preço anterior mantido,3.60,1,unidade,2026-11-05,
+17,Azeite de oliva,Atacadão,Azeite de Oliva Olave Extra Virgem 500ml,22.90,0.5,litro,2026-11-05,https://secure.atacadao.com.br/azeite-de-oliva-olave-extra-virgem-70800/p
+18,Sal refinado,estimativa,sem oferta disponível no Atacadão na data da coleta; preço anterior mantido,2.10,1,kg,2026-11-05,
+19,Pimenta-do-reino,Atacadão,Pimenta do Reino Kitano Preta em Grão 15g,3.79,0.015,kg,2026-11-05,https://secure.atacadao.com.br/pimenta-do-reino-kitano-preta-em-grao-95184/p
+20,Molho de tomate,Atacadão,Molho de Tomate Bulnez Tradicional 300g,1.55,0.3,kg,2026-11-05,https://secure.atacadao.com.br/molho-de-tomate-bulnez-tradicional-14175/p
+21,Feijão preto,Atacadão,Feijão Preto Bulnez Tipo 1 1kg,6.79,1,kg,2026-11-05,https://secure.atacadao.com.br/feijao-preto-bulnez-tipo-1-15281/p
+22,Macarrão penne,Atacadão,Macarrão com Ovos Floriani Penne 500g,2.49,0.5,kg,2026-11-05,https://secure.atacadao.com.br/macarrao-com-ovos-floriani-penne-pacote-com-500g-76032/p
+23,Farinha de mandioca,Atacadão,Farinha de Mandioca Vó Maria Fina 1kg,5.69,1,kg,2026-11-05,https://secure.atacadao.com.br/farinha-de-mandioca-vo-maria-fina-9456/p
+24,Creme de leite,Atacadão,"Creme de Leite Piracanjuba 20% Gordura 1,030kg",19.90,1.03,kg,2026-11-05,https://secure.atacadao.com.br/creme-de-leite-piracanjuba-20--gordura-13530/p
+25,Queijo prato,Atacadão,Queijo Prato Piracanjuba Preço por quilo na peça,44.90,1,kg,2026-11-05,https://secure.atacadao.com.br/queijo-prato-piracanjuba-43926/p
+26,Iogurte natural,Atacadão,"Iogurte Natural Batavo Desnatado 1,15kg",16.90,1.15,kg,2026-11-05,https://secure.atacadao.com.br/iogurte-natural-batavo-desnatado-16458/p
+27,Carne de porco (lombo),Atacadão,Lombo Suíno Aurora Congelado Preço por quilo na peça,21.00,1,kg,2026-11-05,https://secure.atacadao.com.br/lombo-suino-aurora-congelado-7475/p
+28,Linguiça calabresa,Atacadão,Linguiça Calabresa Alegra quilo,22.90,1,kg,2026-11-05,https://secure.atacadao.com.br/linguica-calabresa-alegra-94098/p
+29,Peixe (tilápia),Atacadão,Filé de Tilápia Canção Congelado 800g,36.90,0.8,kg,2026-11-05,https://secure.atacadao.com.br/file-de-tilapia-cancao-congelado-83952/p
+30,Pimentão verde,Atacadão,Pimentão Verde Quilo,16.90,1,kg,2026-11-05,https://secure.atacadao.com.br/pimentao-verde-quilo-1527/p
+31,Cheiro-verde,estimativa,sem oferta disponível no Atacadão na data da coleta; preço anterior mantido,2.80,1,maço,2026-11-05,
+32,Limão,Atacadão,Limão-taiti Quilo,14.90,1,kg,2026-11-05,https://secure.atacadao.com.br/limao-taiti-quilo-1805/p
+33,Abobrinha,estimativa,sem oferta disponível no Atacadão na data da coleta; preço anterior mantido,5.10,1,kg,2026-11-05,
+34,Berinjela,estimativa,sem oferta disponível no Atacadão na data da coleta; preço anterior mantido,6.30,1,kg,2026-11-05,
+35,Chuchu,Atacadão,Chuchu Quilo,2.39,1,kg,2026-11-05,https://secure.atacadao.com.br/chuchu-1923/p
+36,Couve manteiga,estimativa,sem oferta disponível no Atacadão na data da coleta; preço anterior mantido,3.90,1,maço,2026-11-05,
+37,Rúcula,Atacadão,Rúcula Maço,5.59,1,maço,2026-11-05,https://secure.atacadao.com.br/rucula-maco-1746/p
+38,Repolho,Atacadão,Repolho Branco Quilo,4.99,1,kg,2026-11-05,https://secure.atacadao.com.br/repolho-branco-quilo-1677/p
+39,Óleo de soja,estimativa,sem oferta disponível no Atacadão na data da coleta; preço anterior mantido,10.90,1,litro,2026-11-05,
+40,Açúcar refinado,Atacadão,Açúcar Refinado Bulnez 1kg,3.19,1,kg,2026-11-05,https://secure.atacadao.com.br/acucar-refinado-bulnez-14485/p
+41,Café em pó,Atacadão,Café Jardim Tradicional Pouch 500g,16.90,0.5,kg,2026-11-05,https://secure.atacadao.com.br/cafe-jardim-tradicional-16618/p
+42,Extrato de tomate,Atacadão,Extrato de Tomate Xavante 300g,1.89,0.3,kg,2026-11-05,https://secure.atacadao.com.br/extrato-de-tomate-xavante-4934/p
+43,Milho em conserva,Atacadão,Milho Verde Bulnez Lata com 170g,2.79,0.17,kg,2026-11-05,https://secure.atacadao.com.br/milho-verde-bulnez-14157/p
+44,Ervilha em conserva,Atacadão,Ervilha Olé Lata com 170g,2.59,0.17,kg,2026-11-05,https://secure.atacadao.com.br/ervilha-ole-15711/p
+45,Atum em lata,Atacadão,Atum Ralado Burguesa Híbrido 120g,5.99,0.12,kg,2026-11-05,https://secure.atacadao.com.br/atum-ralado-burguesa-hibrido-5903/p
+46,Aveia em flocos,Atacadão,Aveia Quaker Flocos Finos 450g,12.98,0.45,kg,2026-11-05,https://secure.atacadao.com.br/aveia-quaker-flocos-finos-67859/p
+47,Pão de forma,Atacadão,Pão de Forma Bulnez Tradicional 400g,4.49,1,pacote,2026-11-05,https://secure.atacadao.com.br/pao-de-forma-bulnez-tradicional-13872/p
+48,Maçã,Atacadão,Maçã Nacional Fuji Quilo,4.99,1,kg,2026-11-05,https://secure.atacadao.com.br/maca-nacional-fuji-1827/p
+49,Banana prata,Atacadão,Banana Prata Quilo,10.90,1,kg,2026-11-05,https://secure.atacadao.com.br/banana-prata-quilo-1646/p
+50,Brócolis,estimativa,sem oferta disponível no Atacadão na data da coleta; preço anterior mantido,5.60,1,maço,2026-11-05,

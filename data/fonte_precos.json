@@ -1,0 +1,9 @@
+{
+  "_comentario": "De onde vieram os precos de data/ingredientes.csv. A pagina 'Ingredientes e precos' le este arquivo e, item a item, data/precos_coletados.csv.",
+  "local": "Atacadão, loja online (Grupo Carrefour Brasil)",
+  "cidade": "loja online padrão, sem CEP informado",
+  "data_da_coleta": "05/11/2026",
+  "por_que_este_mercado": "O Grupo Carrefour Brasil, dono do Atacadão, é a maior rede supermercadista do país pelo Ranking ABRAS 2025 (faturamento de 2024). O Carrefour Mercado bloqueia consulta automatizada; o catálogo do Atacadão é público.",
+  "como_foi_coletado": "Preço de prateleira consultado no catálogo público do site (atacadao.com.br). Regra única para todos os itens: entre os produtos disponíveis que correspondem ao ingrediente, o de menor preço por kg, litro ou unidade, em embalagem de varejo (até cerca de 1,2 kg) ou vendido por peso. Itens sem oferta disponível naquele dia mantêm o preço anterior e aparecem como estimativa.",
+  "link": "https://www.atacadao.com.br"
+}

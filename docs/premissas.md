@@ -8,8 +8,11 @@ Optou-se por configurar uma família com restrições conflitantes para testar a
 ---
 
 ### 2. Coleta de Preços
-* **Local da Coleta:** [PREENCHER_NOME_DO_SUPERMERCADO][cite: 2]
-* **Data da Coleta:** [PREENCHER_DATA_DA_COLETA][cite: 2]
+* **Local da Coleta:** Atacadão, loja online (atacadao.com.br), do Grupo Carrefour Brasil, a maior rede supermercadista do país no Ranking ABRAS 2025. Usamos a loja online padrão, sem CEP informado. O Carrefour Mercado bloqueia consulta automatizada; o catálogo do Atacadão é público.
+* **Data da Coleta:** 05/11/2026.
+* **Regra de escolha (igual para todos os itens):** entre os produtos disponíveis que correspondem ao ingrediente, o de menor preço por kg, litro ou unidade, em embalagem de varejo (até cerca de 1,2 kg) ou vendido por peso. Embalagem maior só quando é a única oferta (farinha de trigo, 5 kg). O tamanho da embalagem passou a ser o do produto real (ex.: pimenta-do-reino em 15 g, molho de tomate em 300 g).
+* **Resultado:** 42 dos 50 preços coletados. Alface, cheiro-verde, abobrinha, berinjela, couve, brócolis, sal refinado e óleo de soja não tinham oferta disponível no dia e mantêm o preço anterior, marcado como **estimativa**.
+* **Procedência item a item** (produto, preço, tamanho e link): `data/precos_coletados.csv`. A página "Ingredientes e preços" do app mostra essa tabela.
 
 ---
 
