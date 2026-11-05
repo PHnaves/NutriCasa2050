@@ -143,8 +143,8 @@ vem da otimização do que vem de uma regra óbvia.
   primeiro. Ele responde à pergunta: "uma regra simples já não resolveria?"
 
 **Rodada oficial.** 100 cenários × 3 estratégias, horizonte de 5 dias,
-3 refeições por dia, orçamento de R$ 500, tempo limite de 30 s, 0 falhas,
-54 minutos de execução. O card pedia 500 cenários: com soluções inteiras de
+3 refeições por dia, orçamento de R$ 900, preços do Atacadão (05/11/2026),
+tempo limite de 30 s, 0 falhas, cerca de 55 minutos de execução. O card pedia 500 cenários: com soluções inteiras de
 verdade, cada cenário leva cerca de 30 s, e 500 levariam cerca de 4,5 h.
 
 ## 5. Resultados
@@ -162,23 +162,30 @@ do termo de custo do desperdício, não de uma regra escrita à mão.
 
 | Número | Valor | Leitura |
 |---|---|---|
-| Redução de desperdício vs. família normal | **77,1%** | R$ 578 contra R$ 2.527 por semana, em média |
-| Economia projetada por mês (IC 95%) | R$ 9.136 [4.649 ; 13.623] | ver ressalva abaixo |
-| Preço da prescrição | **+R$ 174 por semana e +294 min de cozinha** | seguir as faixas da nutricionista, contra não segui-las |
-| Regra mais atropelada | **fibra do idoso hipertenso** (1173 ocorrências), depois carboidrato da criança e proteína dos adultos | consulta `GROUP BY` sobre a folga |
+| Redução de desperdício vs. família normal | **63,7%** | R$ 122,88 contra R$ 338,00 por semana, em média |
+| Economia projetada por mês (IC 95%) | R$ 2.158 [2.097 ; 2.219] | compras + desperdício; ver ressalva abaixo |
+| Preço da prescrição | **+R$ 333 por semana e +301 min de cozinha** | seguir as faixas da nutricionista, contra não segui-las |
+| Regra mais atropelada | **fibra do idoso hipertenso** (1181 ocorrências), depois carboidrato da criança e proteína dos adultos | consulta `GROUP BY` sobre a folga |
 
 **Ressalvas.**
 
-1. **O guloso desperdiça menos** (R$ 92 por semana) que o otimizado
-   (R$ 578). O otimizado aceita sobra para cumprir a nutrição, porque a
-   folga pesa 1000×. O guloso cozinha o que vence sem olhar a dieta. A
-   vantagem do NutriCasa é contra a família normal **e** na aderência
-   nutricional. Ela não é absoluta em desperdício.
-2. **A economia em reais** é grande porque a família normal compra uma
-   lista habitual com 30% de margem sobre a média do catálogo inteiro. A
-   porcentagem compara cenários idênticos e é o número que defendemos. O
-   valor em reais depende de quão exagerada é a compra habitual.
-3. **O preço da prescrição** vem de duas soluções com tempo limite. Deve ser
+1. **O guloso empata em desperdício** (R$ 119,55 contra R$ 122,88 por
+   semana), mas cozinha o que vence sem olhar a dieta. O NutriCasa chega ao
+   mesmo desperdício **cumprindo as faixas nutricionais** e comprando
+   menos (R$ 520 contra R$ 809 por semana, porque o guloso usa a compra
+   habitual da família normal). A vantagem não é desperdício absoluto: é
+   desperdiçar tão pouco quanto a melhor regra simples sem abrir mão da
+   dieta.
+2. **A economia em reais** vem principalmente da compra: a família normal
+   compra uma lista habitual com 30% de margem sobre a média do catálogo.
+   A porcentagem de desperdício compara cenários idênticos e é o número
+   que defendemos.
+3. **Correção no Sprint 6.** Um item "esquecido na compra" era simulado com
+   preço ×1000, e esse preço também valorava o descarte do estoque inicial
+   do item: 88% do desperdício medido era esse artefato. Corrigido (o item
+   agora só é bloqueado na compra) e a simulação foi refeita. Por isso a
+   redução mudou de 77,1% para 63,7%.
+4. **O preço da prescrição** vem de duas soluções com tempo limite. Deve ser
    lido como ordem de grandeza.
 
 ### 5.3 Gráficos
@@ -187,12 +194,14 @@ Em `notebooks/01_analise.ipynb`: a fronteira de Pareto custo × desperdício
 ("não existe almoço grátis"), a fronteira custo × aderência, a distribuição
 das três estratégias nos cenários, a região viável em 2D com curvas de nível
 (o ótimo cai num vértice) e o grafo bipartido receita–ingrediente, com os
-ingredientes órfãos. O app hospedado mostra os números da simulação na aba
-"Resultados da simulação".
+ingredientes órfãos. O app hospedado mostra os números da simulação na página
+"Resultados".
 
 ## 6. Limitações e premissas declaradas
 
-- **Preços de um único mercado, numa única data**, sem atualização. A
+- **Preços de um único mercado, numa única data**: Atacadão (loja online,
+  sem CEP), em 05/11/2026. 42 dos 50 preços foram coletados; 8 itens sem
+  oferta no dia ficaram como estimativa (`data/precos_coletados.csv`). A
   simulação varia ±15%, mas não modela promoções nem sazonalidade.
 - **Todos comem porções da mesma receita** numa refeição (no máximo 2
   pratos). Não há "um prato para cada um".

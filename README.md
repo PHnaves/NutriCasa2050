@@ -19,8 +19,8 @@ Streamlit e resultados guardados em SQLite.
 > imagem Docker abaixo.
 
 **Em números** (100 semanas simuladas, [docs/resultados.md](docs/resultados.md)):
-**77% menos desperdício** que uma família que compra sempre a mesma lista;
-seguir a dieta prescrita custa cerca de **R$ 174 a mais por semana**; a regra
+**64% menos desperdício** que uma família que compra sempre a mesma lista;
+seguir a dieta prescrita custa cerca de **R$ 333 a mais por semana**; a regra
 nutricional que a realidade mais atropela é a **fibra do idoso**.
 
 ## Como rodar

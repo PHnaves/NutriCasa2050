@@ -80,10 +80,10 @@ def test_aplicar_cenario_nao_altera_o_catalogo_original() -> None:
     assert catalogo.refeicoes_puladas == frozenset()
 
 
-def test_esquecer_itens_marca_o_ingrediente_e_infla_o_preco() -> None:
-    """Dois sinais tem que existir juntos: Catalogo.itens_esquecidos
-    (o que os baselines olham, ja que nao decidem compra pelo preco) E
-    o preco inflado (o que faz o solver nunca escolher comprar)."""
+def test_esquecer_itens_marca_o_ingrediente_sem_mexer_no_preco() -> None:
+    """Regressao (Sprint 6): o preco x1000 que impedia o solver de comprar
+    tambem valorava o descarte do estoque inicial do item, inflando o
+    desperdicio medido. Agora o item so e marcado; o preco fica real."""
     catalogo = _catalogo_exemplo()
     cenario = Cenario(semente=3, itens_esquecidos=1)
 
@@ -91,9 +91,25 @@ def test_esquecer_itens_marca_o_ingrediente_e_infla_o_preco() -> None:
 
     assert len(perturbado.itens_esquecidos) == 1
     (ingrediente_id,) = perturbado.itens_esquecidos
-    preco_original = catalogo.ingredientes[ingrediente_id].preco_embalagem
-    preco_novo = perturbado.ingredientes[ingrediente_id].preco_embalagem
-    assert preco_novo == preco_original * 1000
+    assert (
+        perturbado.ingredientes[ingrediente_id].preco_embalagem
+        == catalogo.ingredientes[ingrediente_id].preco_embalagem
+    )
+
+
+def test_solver_nao_compra_item_esquecido() -> None:
+    from nutricasa2050.otimizacao.variaveis import criar_variaveis
+
+    catalogo = _catalogo_exemplo()
+    perturbado = esquecer_itens(catalogo, Cenario(semente=3, itens_esquecidos=1))
+    (ingrediente_id,) = perturbado.itens_esquecidos
+    parametros = Parametros(horizonte=2, dias_compra=(1,))
+
+    variaveis = criar_variaveis(perturbado, parametros)
+
+    assert variaveis.b[(ingrediente_id, 1)].upBound == 0
+    outros = [i for i in catalogo.ingredientes if i != ingrediente_id]
+    assert all(variaveis.b[(i, 1)].upBound is None for i in outros)
 
 
 def test_visita_aumenta_o_numero_de_membros() -> None:

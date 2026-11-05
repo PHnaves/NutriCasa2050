@@ -35,7 +35,7 @@ limite.
 derivada). Num MIP, o `.pi` do solver não é confiável: ele devolveu 0 até
 para restrição apertada. Por isso calculamos por **diferença finita**:
 resolvemos de novo com o limite +1 e subtraímos (`analise/sensibilidade.py`).
-O botão "Afrouxar sódio" mostra isso ao vivo.
+O imprevisto "Afrouxar sódio", no planejador, mostra isso ao vivo.
 
 **5. Por que os termos do objetivo precisam estar todos em reais?**
 Somar reais com minutos e com gramas faz o peso depender da unidade, não da
@@ -53,7 +53,7 @@ inteiros.
 Que naquele dia, para aquela pessoa, não foi possível ficar dentro da faixa
 do nutriente. O modelo **cedeu** e diz quanto. Sem a folga, o problema ficaria
 inviável ("não existe cardápio") com facilidade. O resultado: a regra mais
-atropelada é a **fibra do idoso hipertenso** (1173 ocorrências em 100
+atropelada é a **fibra do idoso hipertenso** (1181 ocorrências em 100
 cenários).
 
 **8. Por que fecharam a lista de ingredientes ANTES das receitas?**
@@ -76,10 +76,11 @@ valor absoluto.
 
 **"Se eu dobrar o orçamento, o desperdício aumenta ou diminui?"**
 *Depende de o orçamento estar apertando ou não*, e nós medimos. Com 4
-pessoas e 5 dias, R$ 500 e R$ 800 deram **exatamente a mesma solução**: o
-modelo gasta cerca de R$ 365 porque não precisa de mais, e dinheiro sobrando
+pessoas e 5 dias, com os preços do Atacadão, R$ 700 e R$ 900 deram
+**exatamente a mesma solução**: o modelo gasta cerca de R$ 440 a R$ 550
+porque não precisa de mais, e dinheiro sobrando
 não compra nada a mais, já que comprar e jogar fora custa. Já com o
-orçamento **abaixo** do necessário (R$ 300), não existe cardápio inteiro
+orçamento **apertado** (R$ 500, ou R$ 700 com o corte de 30%), o solver não acha cardápio inteiro
 viável no tempo limite. Moral: a R12 só influencia quando está ativa, e o
 preço-sombra dela é zero quando ela folga.
 
@@ -93,22 +94,30 @@ descarte é 0. R10 garante a **contabilidade**; o termo de custo dá a
 
 **"Vocês poderiam ter usado um algoritmo guloso. Por que não usaram?"**
 Nós implementamos um guloso, para comparar (`simulacao/baselines.py`). E
-somos honestos: ele desperdiça **menos** que o modelo (R$ 92 contra R$ 578 por
-semana). Só que ele faz isso **ignorando a dieta**: cozinha o que vence, sem
+somos honestos: ele desperdiça **praticamente o mesmo** que o modelo
+(R$ 119,55 contra R$ 122,88 por semana). Só que ele faz isso **ignorando a dieta**: cozinha o que vence, sem
 olhar se o idoso passou do sódio ou se a criança comeu o suficiente. Um
 guloso decide uma refeição de cada vez e não consegue trocar um pouco de
 sobra hoje por cumprir a nutrição da semana. O modelo equilibra os seis
 objetivos ao mesmo tempo e garante as restrições duras (R1 a R4, R6, R10 a
-R12). Contra a família normal, o modelo reduz o desperdício em 77%.
+R12), e ainda compra menos (R$ 520 contra R$ 809 por semana). Contra a
+família normal, o modelo reduz o desperdício em 63,7%.
 
 ## Perguntas prováveis sobre o Sprint 6
 
 - **"Esses números são os mesmos de antes?"** Não. No Sprint 6 descobrimos
   que, quando o tempo limite acabava antes de qualquer solução inteira, o
   código aceitava a relaxação linear (pratos fracionados). Corrigimos
-  (`solucao_e_inteira`), refizemos a simulação, e a redução caiu de 91% para
-  77,1%. Mostrar o erro e a correção é melhor do que defender um número
-  errado.
+  (`solucao_e_inteira`) e a redução caiu de 91% para 77,1%. Depois, ao
+  trocar os preços pelos do Atacadão, achamos um segundo erro: o item
+  "esquecido na compra" era simulado com preço ×1000, e esse preço também
+  valorava o descarte, inflando 88% do desperdício medido. Corrigido, a
+  redução ficou em **63,7%**. Mostrar o erro e a correção é melhor do que
+  defender um número errado.
+- **"De onde vêm os preços?"** Do Atacadão (Grupo Carrefour, maior rede do
+  país no Ranking ABRAS 2025), loja online, em 05/11/2026, com uma regra
+  única: o menor preço por kg em embalagem de varejo. 42 dos 50 coletados;
+  8 estimativas. Tudo em `data/precos_coletados.csv`.
 - **"A solução é ótima?"** É a melhor **encontrada** dentro do tempo limite.
   Com 10 s e com 60 s, o mesmo cenário teve objetivo 36× diferente
   (`docs/resultados.md`).

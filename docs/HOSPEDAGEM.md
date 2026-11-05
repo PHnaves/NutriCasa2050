@@ -2,7 +2,7 @@
 
 Este guia mostra três jeitos de colocar o app no ar, do mais simples ao mais
 controlado. O app é **um processo Streamlit só**: não tem API separada nem
-banco servidor. Ele lê os CSV de `data/` e, na aba "Resultados da simulação",
+banco servidor. Ele lê os CSV de `data/` e, na página "Resultados",
 o arquivo SQLite `var/results.db`, que vai versionado no repositório.
 
 ## O que já está pronto no repositório
@@ -12,7 +12,7 @@ o arquivo SQLite `var/results.db`, que vai versionado no repositório.
 | Dependências com versão fixa | `requirements.txt` | o servidor instala exatamente o que foi testado |
 | `import nutricasa2050` sem `pip install -e .` | topo do `app.py` (põe `src/` no `sys.path`) | o Streamlit Cloud só roda `pip install -r requirements.txt` |
 | Tema com as cores da logo | `.streamlit/config.toml` | é lido automaticamente |
-| Resultados da Monte Carlo | `var/results.db` (exceção no `.gitignore`) | a aba de resultados funciona sem rodar a simulação no servidor |
+| Resultados da Monte Carlo | `var/results.db` (exceção no `.gitignore`) | a página Resultados funciona sem rodar a simulação no servidor |
 | Imagem Docker | `Dockerfile` (+ `publicar.yml` publica no ghcr.io a cada tag) | hospedagem em qualquer lugar que rode container |
 | Solver | CBC embutido no PuLP 3.3.2 | não precisa instalar nada no sistema |
 
@@ -20,7 +20,7 @@ Antes de publicar, confira localmente:
 
 ```bash
 pip install -r requirements.txt
-streamlit run app.py      # http://localhost:8501, as duas abas devem abrir
+streamlit run app.py      # http://localhost:8501, as cinco páginas do menu devem abrir
 ```
 
 ## Opção 1 — Streamlit Community Cloud (gratuito, recomendado)
@@ -56,8 +56,8 @@ tornar o app público e manter o código privado no GitHub.
 
 - **CPU compartilhada.** Cada clique leva de 10 a 20 s para resolver. O app
   guarda as respostas em cache (`st.cache_data`), então voltar a uma
-  configuração já vista é instantâneo. Na apresentação, clique uma vez em
-  cada botão antes, para "aquecer" o cache.
+  configuração já vista é instantâneo. Na apresentação, rode uma vez cada
+  imprevisto antes, para "aquecer" o cache.
 - **O app dorme** depois de alguns dias sem acesso. Abra o link na véspera.
 - **Disco temporário.** O que o app grava some quando ele reinicia. Não há
   problema: o app hospedado só lê dados.

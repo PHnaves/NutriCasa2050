@@ -10,24 +10,76 @@ from collections import defaultdict
 from nutricasa2050.dominio import Catalogo, Parametros, Solucao
 from nutricasa2050.otimizacao.restricoes import preparar_catalogo
 
+DIAS_PARA_VENCER = 2
+
+
+def resumo_nutricional(aderencia: list[dict]) -> list[dict]:
+    """Junta a aderencia dia a dia (uma linha por pessoa x nutriente x dia)
+    em uma linha por pessoa x nutriente: a media diaria entregue, a faixa e
+    o alvo, e em quantos dias foi preciso usar folga (sair da faixa). E o
+    que a tela de nutricao mostra — 120 barrinhas diarias nao comunicam."""
+    grupos: dict[tuple[str, str], list[dict]] = {}
+    for item in aderencia:
+        grupos.setdefault((item["membro_id"], item["nutriente"]), []).append(item)
+    resumo = []
+    for (membro_id, nutriente), itens in grupos.items():
+        media = sum(i["valor"] for i in itens) / len(itens)
+        primeiro = itens[0]
+        resumo.append(
+            {
+                "membro_id": membro_id,
+                "nutriente": nutriente,
+                "media": media,
+                "minimo": primeiro["minimo"],
+                "maximo": primeiro["maximo"],
+                "alvo": primeiro["alvo"],
+                "dias": len(itens),
+                "dias_fora_da_faixa": sum(1 for i in itens if i["folga"] > 1e-6),
+            }
+        )
+    return resumo
+
+
+def _itens_perto_de_vencer(solucao: Solucao, catalogo: Catalogo) -> set[tuple[str, int]]:
+    """(ingrediente, dia) em que a despensa TINHA um lote daquele
+    ingrediente vencendo em ate DIAS_PARA_VENCER dias (inclusive no proprio
+    dia). "Tinha" = sobrou no fim do dia anterior (ou, no dia 1, o estoque
+    inicial). Lotes que so chegam no dia nao contam: a ideia e marcar o que
+    ja estava na geladeira correndo o risco de estragar."""
+    perto: set[tuple[str, int]] = set()
+    for lote in catalogo.lotes.values():
+        for dia in range(1, lote.dia_vencimento + 1):
+            if lote.dia_vencimento - dia > DIAS_PARA_VENCER:
+                continue
+            if dia == 1:
+                disponivel = lote.quantidade if lote.dia_compra is None else 0.0
+            else:
+                disponivel = solucao.estoque.get((lote.id, dia - 1), 0.0) or 0.0
+            if disponivel > 1e-6:
+                perto.add((lote.ingrediente_id, dia))
+    return perto
+
 
 def _cardapio(solucao: Solucao, catalogo: Catalogo) -> list[dict]:
+    perto_de_vencer = _itens_perto_de_vencer(solucao, catalogo)
     resultado = []
     for (receita_id, dia, refeicao), fracao in solucao.cardapio.items():
+        ingredientes_da_receita = catalogo.ingredientes_da_receita(receita_id)
         resultado.append(
             {
                 "dia": dia,
                 "refeicao": refeicao,
                 "receita_id": receita_id,
                 "receita_nome": catalogo.receitas[receita_id].nome,
-                # R10 (FEFO, S3-01) ja existe no modelo, mas aqui so
-                # sabemos QUANTO foi cozinhado (x), nao de qual lote veio
-                # cada grama consumida (R8 so soma por ingrediente). Marcar
-                # isso com confianca exigiria rastrear lote por receita, o
-                # que nenhum card do Sprint 3 pede — o comportamento
-                # anti-desperdicio aparece no CARDAPIO em si (S3-08), nao
-                # numa flag por prato.
-                "puxado_por_validade": False,
+                # Sprint 6: antes era sempre False. Agora marca o prato que
+                # USA um ingrediente que estava na despensa vencendo em ate
+                # 2 dias — um FATO sobre o plano (o modelo nao diz "por que"
+                # escolheu o prato; o porque e o teste do S3-08). Nao rastreia
+                # lote por receita: R8 so soma consumo por ingrediente.
+                "puxado_por_validade": any(
+                    (ingrediente_id, dia) in perto_de_vencer
+                    for ingrediente_id in ingredientes_da_receita
+                ),
                 "preparado": fracao > 0,
             }
         )

@@ -146,3 +146,9 @@ def folgas_mais_frequentes(engine: EngineSQLite) -> list[dict]:
         }
         for linha in linhas
     ]
+
+
+def numero_de_cenarios(engine: EngineSQLite) -> int:
+    """Quantos cenarios (semanas sorteadas) a Monte Carlo gravou."""
+    with conexao(engine) as conn:
+        return conn.execute("SELECT COUNT(*) AS n FROM cenario").fetchone()["n"]

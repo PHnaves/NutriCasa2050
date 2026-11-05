@@ -1,51 +1,51 @@
 id,nome,unidade,categoria,validade_dias,preco_embalagem,tamanho_embalagem
-1,Arroz branco,kg,secos,180,6.90,1
-2,Feijão carioca,kg,secos,180,8.50,1
-3,Macarrão espaguete,kg,secos,180,4.20,1
-4,Farinha de trigo,kg,secos,180,5.80,1
-5,Ovo,unidade,laticinios,21,11.90,12
-6,Leite integral,litro,laticinios,10,5.40,1
-7,Manteiga,kg,laticinios,10,9.80,1
-8,Queijo mussarela,kg,laticinios,10,26.90,1
-9,Peito de frango,kg,carnes,3,24.90,1
-10,Carne moída (acém),kg,carnes,3,22.50,1
-11,Cebola,kg,hortifruti,15,4.50,1
-12,Alho,kg,hortifruti,15,9.90,1
-13,Tomate,kg,hortifruti,15,6.20,1
-14,Cenoura,kg,hortifruti,15,4.80,1
-15,Batata inglesa,kg,hortifruti,15,5.40,1
+1,Arroz branco,kg,secos,180,3.99,1
+2,Feijão carioca,kg,secos,180,7.89,1
+3,Macarrão espaguete,kg,secos,180,1.99,0.5
+4,Farinha de trigo,kg,secos,180,13.99,5
+5,Ovo,unidade,laticinios,21,7.99,12
+6,Leite integral,litro,laticinios,10,5.39,1
+7,Manteiga,kg,laticinios,10,8.97,0.2
+8,Queijo mussarela,kg,laticinios,10,49.90,1
+9,Peito de frango,kg,carnes,3,20.99,1
+10,Carne moída (acém),kg,carnes,3,49.99,1
+11,Cebola,kg,hortifruti,15,6.99,1
+12,Alho,kg,hortifruti,15,18.90,1
+13,Tomate,kg,hortifruti,15,17.90,1
+14,Cenoura,kg,hortifruti,15,3.98,1
+15,Batata inglesa,kg,hortifruti,15,5.98,1
 16,Alface crespa,unidade,folhosos,4,3.60,1
-17,Azeite de oliva,litro,secos,180,24.90,1
+17,Azeite de oliva,litro,secos,180,22.90,0.5
 18,Sal refinado,kg,secos,180,2.10,1
-19,Pimenta-do-reino,kg,secos,180,8.40,1
-20,Molho de tomate,kg,secos,365,3.90,1
-21,Feijão preto,kg,secos,180,8.70,1
-22,Macarrão penne,kg,secos,180,4.10,1
-23,Farinha de mandioca,kg,secos,180,6.10,1
-24,Creme de leite,kg,laticinios,10,4.80,1
-25,Queijo prato,kg,laticinios,10,24.50,1
-26,Iogurte natural,kg,laticinios,10,7.90,1
-27,Carne de porco (lombo),kg,carnes,3,26.80,1
-28,Linguiça calabresa,kg,carnes,3,19.90,1
-29,Peixe (tilápia),kg,carnes,2,28.50,1
-30,Pimentão verde,kg,hortifruti,15,7.00,1
+19,Pimenta-do-reino,kg,secos,180,3.79,0.015
+20,Molho de tomate,kg,secos,365,1.55,0.3
+21,Feijão preto,kg,secos,180,6.79,1
+22,Macarrão penne,kg,secos,180,2.49,0.5
+23,Farinha de mandioca,kg,secos,180,5.69,1
+24,Creme de leite,kg,laticinios,10,19.90,1.03
+25,Queijo prato,kg,laticinios,10,44.90,1
+26,Iogurte natural,kg,laticinios,10,16.90,1.15
+27,Carne de porco (lombo),kg,carnes,3,21.00,1
+28,Linguiça calabresa,kg,carnes,3,22.90,1
+29,Peixe (tilápia),kg,carnes,2,36.90,0.8
+30,Pimentão verde,kg,hortifruti,15,16.90,1
 31,Cheiro-verde,maço,hortifruti,4,2.80,1
-32,Limão,kg,hortifruti,15,4.20,1
+32,Limão,kg,hortifruti,15,14.90,1
 33,Abobrinha,kg,hortifruti,15,5.10,1
 34,Berinjela,kg,hortifruti,15,6.30,1
-35,Chuchu,kg,hortifruti,15,5.20,1
+35,Chuchu,kg,hortifruti,15,2.39,1
 36,Couve manteiga,maço,folhosos,4,3.90,1
-37,Rúcula,maço,folhosos,4,4.30,1
-38,Repolho,kg,folhosos,4,6.80,1
+37,Rúcula,maço,folhosos,4,5.59,1
+38,Repolho,kg,folhosos,4,4.99,1
 39,Óleo de soja,litro,secos,180,10.90,1
-40,Açúcar refinado,kg,secos,180,5.10,1
-41,Café em pó,kg,secos,180,16.90,1
-42,Extrato de tomate,kg,secos,365,4.80,1
-43,Milho em conserva,kg,secos,365,4.90,1
-44,Ervilha em conserva,kg,secos,365,4.70,1
-45,Atum em lata,kg,secos,365,8.20,1
-46,Aveia em flocos,kg,secos,180,8.60,1
-47,Pão de forma,pacote,secos,180,9.80,1
-48,Maçã,kg,hortifruti,15,8.90,1
-49,Banana prata,kg,hortifruti,15,6.80,1
+40,Açúcar refinado,kg,secos,180,3.19,1
+41,Café em pó,kg,secos,180,16.90,0.5
+42,Extrato de tomate,kg,secos,365,1.89,0.3
+43,Milho em conserva,kg,secos,365,2.79,0.17
+44,Ervilha em conserva,kg,secos,365,2.59,0.17
+45,Atum em lata,kg,secos,365,5.99,0.12
+46,Aveia em flocos,kg,secos,180,12.98,0.45
+47,Pão de forma,pacote,secos,180,4.49,1
+48,Maçã,kg,hortifruti,15,4.99,1
+49,Banana prata,kg,hortifruti,15,10.90,1
 50,Brócolis,maço,folhosos,4,5.60,1

@@ -30,7 +30,7 @@ lint:
 N ?= 100
 TIMEOUT ?= 30
 resultados:
-	NUTRICASA2050_SOLVER_TIMEOUT=$(TIMEOUT) PYTHONPATH=src $(PYTHON) -m nutricasa2050.simulacao.monte_carlo --n $(N) --horizonte 5 --orcamento 500
+	NUTRICASA2050_SOLVER_TIMEOUT=$(TIMEOUT) PYTHONPATH=src $(PYTHON) -m nutricasa2050.simulacao.monte_carlo --n $(N) --horizonte 5 --orcamento 900
 
 # Copia o banco principal para var/results.db — o unico .db versionado,
 # lido pela aba "Resultados da simulacao" do app hospedado.
