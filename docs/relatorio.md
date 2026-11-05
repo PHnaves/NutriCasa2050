@@ -1,113 +1,221 @@
-# NutriCasa 2050 — Relatório final
+# NutriCasa 2050: relatório final
 
-> O trecho marcado **[A PREENCHER]** depende de uma fonte que o grupo
-> ainda precisa citar.
-> Nenhum número abaixo foi inventado: o que não está validado está dito.
+> Os números deste relatório vêm de rodadas reais do solver, registradas em
+> [resultados.md](resultados.md). Onde um número tem ressalva, ela está
+> escrita ao lado dele.
 
-## 1. O problema
+## 1. Problema e motivação
 
-Uma família decide toda semana o que cozinhar, o que comprar e o que usar
-antes de vencer — sem enxergar o conjunto. O resultado típico é compra em
-excesso, comida jogada fora e dieta que não respeita as necessidades de cada
-pessoa (um idoso hipertenso, uma criança, etc.).
+Cada brasileiro desperdiça em média **41,6 kg de alimentos por ano dentro
+de casa**; uma família de até três pessoas, cerca de 128 kg (Embrapa e FGV,
+pesquisa "Intercâmbio Brasil–União Europeia sobre desperdício de
+alimentos", Porpino et al., 2018). Arroz, carne, feijão e frango lideram a
+lista. A maior parte desse desperdício nasce no planejamento: compra-se por
+hábito, sem saber o que vai ser cozinhado, e o que vence primeiro não é
+usado primeiro. O UNEP Food Waste Index Report 2024 estima, para o Brasil,
+94 kg por pessoa por ano, mas essa medida inclui partes não comestíveis e
+não é comparável com a anterior.
 
-Dado o estoque, o orçamento, o tempo de cozinha e a prescrição de cada
-membro, o NutriCasa 2050 escolhe cardápio, porções e lista de compras de
-menor custo e menor desperdício.
+**Por que isso é otimização e não recomendação.** Um app que sugere
+receitas responde "o que eu poderia cozinhar?". A família precisa decidir,
+**ao mesmo tempo**, o cardápio da semana, quanto cada pessoa come e o que
+comprar, sob um orçamento, um tempo de cozinha diário, a validade de cada
+lote na despensa e a dieta de cada pessoa. Essas decisões dependem umas das
+outras. Escolher um prato muda o estoque, que muda a compra, que muda o
+custo. Sugerir uma receita de cada vez (uma heurística) não enxerga essa
+interação. Um modelo de programação matemática enxerga, e devolve a melhor
+combinação que encontrou, com a garantia de que todas as regras foram
+respeitadas ou de que a violação foi medida e penalizada.
 
-**[A PREENCHER]** Dado estatístico de desperdício de alimentos em domicílios
-brasileiros, com fonte citável.
+## 2. Formulação
 
-## 2. Base acadêmica
+A formulação completa (conjuntos, parâmetros, variáveis, objetivo e as
+doze restrições, cada uma com "o que faz" e "o que acontece se sair") está
+em [formulacao.md](formulacao.md). Este é o resumo.
 
-O ponto de partida é o problema da dieta de Stigler (1945): entre 77
-alimentos, achar a combinação de menor custo que atende 9 nutrientes — a
-origem histórica da programação linear. O protótipo está em
-`notebooks/00_stigler.ipynb`. O NutriCasa acrescenta três dimensões que o
-problema original não tinha:
+### 2.1 Base acadêmica
 
-1. **Tempo:** restrição e custo de preparo (R11).
-2. **Perecibilidade:** lotes com validade e descarte (R9, R10).
-3. **Heterogeneidade:** cada pessoa com faixas, porções e restrições
-   próprias (R5–R7).
+O ponto de partida é o **problema da dieta de Stigler (1945)**: entre 77
+alimentos, achar a combinação de menor custo que atende 9 nutrientes. É uma
+das origens históricas da programação linear, resolvida depois com o
+simplex. O protótipo está em `notebooks/00_stigler.ipynb`. O NutriCasa
+acrescenta **três dimensões** que o problema original não tinha:
 
-## 3. O modelo
+1. **Tempo:** cada receita tem tempo de preparo, há um limite diário (R11)
+   e o tempo entra no objetivo.
+2. **Perecibilidade:** o estoque é controlado **por lote**, cada lote com sua
+   data de vencimento (R9), e o que vence sai como descarte (R10).
+3. **Heterogeneidade:** quatro pessoas, cada uma com faixas nutricionais,
+   tamanho de porção e restrições alimentares próprias (R5 a R7).
 
-Programação linear inteira mista (PuLP + CBC). Formulação completa, com as
-12 restrições, em [formulacao.md](formulacao.md). Em resumo:
+### 2.2 Variáveis
 
-- **Decisões:** quais pratos cozinhar (binária), quanto cada pessoa come
-  (fração), quantas embalagens comprar (inteira), e variáveis auxiliares de
-  estoque por lote, folga e desvio.
-- **Objetivo:** seis termos, todos em reais — compra, desperdício, tempo de
-  cozinha, repetição, folga nutricional (peso 1000) e desvio do alvo.
-- **Restrições:** cardápio (R1–R4), nutrição (R5–R7), estoque e validade
-  (R8–R10), operacional (R11–R12). R10 é o coração anti-desperdício.
-- **Tamanho** (catálogo real, horizonte 5, 4 pessoas): 504 binárias de
-  cozimento, 2016 frações, 50 inteiras de compra, 4360 restrições.
+| Símbolo | Tipo | Significado |
+|---|---|---|
+| x | binária | a receita r é cozinhada no dia d, na refeição m |
+| y | contínua [0,1] | fração do prato que cada pessoa come |
+| b | inteira | embalagens compradas de cada ingrediente, em cada dia de compra |
+| s, u, w | contínuas | estoque, consumo e descarte por lote e dia |
+| f⁻, f⁺ | contínuas | folga: quanto faltou ou sobrou da faixa nutricional |
+| s⁺, s⁻ | contínuas | desvio acima e abaixo do alvo prescrito |
 
-## 4. Implementação
+Tamanho com o catálogo real (horizonte de 5 dias, 4 pessoas): 504 binárias,
+2016 frações, 50 inteiras e 4360 restrições.
 
-Python 3.11; `src/nutricasa2050/` com domínio, dados, otimização,
-simulação, análise e persistência (SQLite); interface Streamlit (`app.py`);
-CI com ruff, pytest e container Docker; imagem publicada no ghcr.io.
-Mapa de arquivos no [README](../README.md).
+### 2.3 Objetivo
+
+Minimizar a soma de seis termos, **todos em reais**: custo de compra, valor
+desperdiçado, tempo de preparo (R$ 0,10 por minuto), desvio do alvo,
+folga nutricional (peso 1000) e perda de preferência.
+
+### 2.4 As doze restrições
+
+| Bloco | Restrições |
+|---|---|
+| A, Cardápio | R1 cobertura · R2 vínculo prato/porção · R3 até 2 pratos por refeição · R4 variedade |
+| B, Nutrição | R5 faixas com folga · R6 restrição individual (ex.: sem glúten só para a criança) · R7 desvio do alvo |
+| C, Estoque | R8 consumo derivado · R9 balanço por lote · **R10 validade** (o coração do projeto) |
+| D, Operacional | R11 tempo de preparo · R12 orçamento |
+
+## 3. Implementação e decisões técnicas
+
+**Arquitetura em camadas.** `dominio.py` (dataclasses) ← `dados/` (leitura
+e validação dos CSV/JSON) ← `otimizacao/` (variáveis, restrições,
+objetivo, solver) ← `simulacao/` e `analise/` ← `app.py`. A tela não faz
+conta nenhuma: só liga widgets a funções de `src/`. `serializacao.py`
+converte qualquer solução, do solver ou de um baseline, no **mesmo
+dicionário**, usado pela tela, pelo banco e pelos gráficos.
+
+**Por que SQLite e não Postgres.** O app é um processo só, roda no
+notebook de quem apresenta e na nuvem gratuita, e os dados são de
+escrita única (a simulação grava, as consultas leem). SQLite é um arquivo,
+não precisa de servidor e pode ser versionado (`var/results.db` vai junto
+com o app hospedado). Postgres traria servidor, credenciais e rede, sem
+nenhum ganho para esse volume de dados. Testes e simulação usam **bancos
+separados** por variável de ambiente, para que um teste nunca toque nos
+resultados reais.
+
+**Por que todos os termos do objetivo estão em reais.** Somar "reais" com
+"minutos" com "gramas de proteína" faz o peso relativo depender da unidade
+escolhida, não da importância. Convertendo tudo para reais (minuto vale
+R$ 0,10, folga nutricional vale R$ 1000 por unidade), o objetivo pode ser
+lido como "quanto essa semana custa, contando tudo", e os pesos viram
+decisões explícitas e discutíveis.
+
+**Linearização do valor absoluto (R7).** O desvio do alvo é |consumo −
+alvo|, que não é linear. Introduzem-se s⁺ ≥ 0 e s⁻ ≥ 0 com consumo − alvo
+= s⁺ − s⁻ e minimiza-se s⁺ + s⁻. No ótimo, no máximo uma das duas é
+positiva e a soma é exatamente o valor absoluto.
+
+**Folga em vez de inviabilidade (R5).** Uma faixa nutricional dura deixa o
+modelo inviável com facilidade (basta um ingrediente faltar). Com folga
+penalizada, o modelo sempre devolve um cardápio e **mede** quanto cada regra
+foi violada. Essa medida virou um resultado (seção 5).
+
+**Desempenho e uma correção.** O CBC raramente prova otimalidade no
+catálogo completo, então o solver roda com tempo limite (padrão de 10 s no
+app, 30 s na simulação). No Sprint 6 descobrimos que, quando o tempo acaba
+**antes** de existir uma solução inteira, o PuLP devolve os valores da
+**relaxação linear** (pratos "0,3 cozinhados"), que parecem válidos.
+`resolver()` agora verifica a integralidade (`solucao_e_inteira`) e
+descarta essas respostas. Os números de simulação antigos foram refeitos.
+
+**Qualidade.** 184 testes automatizados (incluindo um que abre o app inteiro com o Streamlit AppTest) (pytest), lint (ruff), CI no GitHub
+Actions com um job que prova que o solver funciona **dentro** do container
+Docker, e imagem publicada no ghcr.io a cada versão.
+
+## 4. Simulação e metodologia
+
+**Cenários.** Cada cenário é uma semana levemente diferente da padrão,
+sorteada a partir de uma semente (reprodutível): cada preço varia até ±15%,
+pode chegar uma visita (1 em 4), até 2 refeições não acontecem, até 3
+ingredientes são esquecidos na compra e até 2 lotes estragam antes do
+previsto. As três estratégias rodam sobre **os mesmos dados perturbados**,
+e há um teste que garante isso.
+
+**Por que dois baselines.** Com um baseline só, não dá para separar o que
+vem da otimização do que vem de uma regra óbvia.
+
+- **Família normal (humano):** escolhe pelo gosto, compra a lista habitual
+  (sem olhar o cardápio) e não confere o que vence primeiro. É a referência
+  da manchete.
+- **Guloso:** a mesma compra habitual, mas cozinha primeiro o que vence
+  primeiro. Ele responde à pergunta: "uma regra simples já não resolveria?"
+
+**Rodada oficial.** 100 cenários × 3 estratégias, horizonte de 5 dias,
+3 refeições por dia, orçamento de R$ 500, tempo limite de 30 s, 0 falhas,
+54 minutos de execução. O card pedia 500 cenários: com soluções inteiras de
+verdade, cada cenário leva cerca de 30 s, e 500 levariam cerca de 4,5 h.
 
 ## 5. Resultados
 
-### 5.1 O que está validado
+### 5.1 O comportamento emergente (S3-08)
 
-- **Anti-desperdício funciona e é causal.** Em um cenário controlado
-  (`tests/integracao/test_coracao.py`), com o ingrediente vencendo, o
-  modelo cozinha o prato que o consome e descarta 0 kg de tomate; com o peso
-  do desperdício zerado (e a regra de validade mantida), descarta
-  mais de 0,5 kg. O teste foi desenhado para separar o efeito do peso de
-  outros fatores (preço e tempo iguais entre as receitas).
-- **Preço-sombra** por diferença finita, porque o dual do CBC não é
-  confiável em MIP (ver `analise/sensibilidade.py`).
+Ninguém programou "use primeiro o que vence antes". Num cenário controlado
+(`tests/integracao/test_coracao.py`), com tomate perto de vencer e receitas
+com preço e tempo equivalentes, o modelo cozinha os pratos com tomate e
+**descarta 0 kg**. Zerando apenas o peso do desperdício, com a regra de
+validade mantida, ele passa a descartar mais de 0,5 kg. O comportamento vem
+do termo de custo do desperdício, não de uma regra escrita à mão.
 
-### 5.2 Desempenho e uma correção importante
+### 5.2 Os quatro números
 
-Cada solução real leva de 10 a 60 s no catálogo completo. Quando o tempo
-limite estoura, o CBC pode devolver apenas a **relaxação linear** (pratos
-fracionados), que parece uma resposta válida. Isso foi tratado errado nos
-Sprints 3–4 e corrigido no 6: `resolver` agora verifica a integralidade e
-descarta o resultado se ela falhar. Detalhes e medições em
-[resultados.md](resultados.md). Também: "Optimal" com tempo limite estourado
-é a melhor solução *encontrada*, não provada ótima.
+| Número | Valor | Leitura |
+|---|---|---|
+| Redução de desperdício vs. família normal | **77,1%** | R$ 578 contra R$ 2.527 por semana, em média |
+| Economia projetada por mês (IC 95%) | R$ 9.136 [4.649 ; 13.623] | ver ressalva abaixo |
+| Preço da prescrição | **+R$ 174 por semana e +294 min de cozinha** | seguir as faixas da nutricionista, contra não segui-las |
+| Regra mais atropelada | **fibra do idoso hipertenso** (1173 ocorrências), depois carboidrato da criança e proteína dos adultos | consulta `GROUP BY` sobre a folga |
 
-### 5.3 Monte Carlo (os números da apresentação)
+**Ressalvas.**
 
-Rodada de 100 cenários (horizonte 5, orçamento 500, tempo limite 30 s, 0
-falhas):
+1. **O guloso desperdiça menos** (R$ 92 por semana) que o otimizado
+   (R$ 578). O otimizado aceita sobra para cumprir a nutrição, porque a
+   folga pesa 1000×. O guloso cozinha o que vence sem olhar a dieta. A
+   vantagem do NutriCasa é contra a família normal **e** na aderência
+   nutricional. Ela não é absoluta em desperdício.
+2. **A economia em reais** é grande porque a família normal compra uma
+   lista habitual com 30% de margem sobre a média do catálogo inteiro. A
+   porcentagem compara cenários idênticos e é o número que defendemos. O
+   valor em reais depende de quão exagerada é a compra habitual.
+3. **O preço da prescrição** vem de duas soluções com tempo limite. Deve ser
+   lido como ordem de grandeza.
 
-| Número | Valor |
-|---|---|
-| Redução de desperdício vs. família normal | 77,1% |
-| Economia projetada por mês (IC 95%) | R$ 9.136 [4.649 ; 13.623] |
-| Preço da prescrição (ordem de grandeza) | +R$ 174/semana, +294 min de cozinha |
-| Folga mais frequente | fibra do idoso hipertenso; carboidrato da criança |
+### 5.3 Gráficos
 
-Ressalva: o baseline guloso desperdiça menos (R$ 92 contra R$ 578 do
-otimizado por semana), porque o otimizado aceita desperdício para cumprir a
-nutrição; a vantagem do modelo é contra a família normal e na aderência.
-Com tempo limite de 30 s a solução está longe do ótimo provado.
+Em `notebooks/01_analise.ipynb`: a fronteira de Pareto custo × desperdício
+("não existe almoço grátis"), a fronteira custo × aderência, a distribuição
+das três estratégias nos cenários, a região viável em 2D com curvas de nível
+(o ótimo cai num vértice) e o grafo bipartido receita–ingrediente, com os
+ingredientes órfãos. O app hospedado mostra os números da simulação na aba
+"Resultados da simulação".
 
-Os valores publicados antes (91,0%, R$ 12.635/mês) foram invalidados.
+## 6. Limitações e premissas declaradas
 
-## 6. Limitações
+- **Preços de um único mercado, numa única data**, sem atualização. A
+  simulação varia ±15%, mas não modela promoções nem sazonalidade.
+- **Todos comem porções da mesma receita** numa refeição (no máximo 2
+  pratos). Não há "um prato para cada um".
+- **Sem reaproveitamento de sobras** entre refeições: o que não se come do
+  prato não volta ao estoque.
+- **Horizonte de 5 dias** na simulação. Sete dias resolvem no app, mas
+  demoram mais e com qualidade pior. O HiGHS foi testado e foi mais lento.
+- **Sem prova de otimalidade:** as respostas são as melhores encontradas
+  dentro do tempo limite. Com 10 s e com 60 s, o objetivo chegou a variar
+  36×.
+- **Baselines são regras fixas**, não observação de famílias reais.
+- **100 cenários, não 500**, pelo tempo de execução (seção 4).
+- **Visitante fica a semana toda**, sem presença parcial.
 
-- Horizonte de 5 dias; semana de 7 dias não resolve no tempo razoável com o
-  CBC (testado também com HiGHS, pior).
-- Qualidade da solução depende do tempo limite; não há prova de otimalidade.
-- Dados de preço e composição vêm de tabelas estáticas, sem atualização.
-- Baselines (humano e guloso) são simplificações; o "humano" é uma regra
-  fixa, não observação de famílias reais.
-- Publicação online do app pendente (S5-08).
+## 7. Trabalhos futuros
 
-## 7. Conclusão e próximos passos
-
-O modelo reproduz, com tempo e perecibilidade, o espírito do problema de
-Stigler e comprova com teste que o desperdício cai *por causa* do termo de
-custo e da regra de validade. Os percentuais acima vêm de 100 cenários, não 500. Próximos passos: solver mais forte ou decomposição
-para horizonte de 7 dias, dados reais de preço e publicação do app.
+- **Designação de nutricionistas a famílias.** Dado um conjunto de
+  nutricionistas (com especialidade, agenda e região) e de famílias (com
+  perfis clínicos), atribuir cada família a um profissional minimizando
+  deslocamento e incompatibilidade. É um problema de designação clássico de
+  Pesquisa Operacional e ficou fora do escopo de propósito.
+- Solver mais forte (comercial, ou decomposição por dia) para a semana de 7
+  dias com prova de otimalidade.
+- Preços reais via API de supermercado e validade lida da nota fiscal.
+- Reaproveitamento de sobras como novo tipo de lote.
+- Validar o baseline humano com o diário de compras de famílias reais.

@@ -1,4 +1,26 @@
-# Resultados dos Sprints 3 e 4
+# Resultados dos Sprints 3, 4 e 6
+
+> ## Sprint 6 — o que mais foi corrigido ao preparar a hospedagem
+>
+> Rodando o app inteiro com os parametros padrao (Streamlit AppTest, novo
+> teste `tests/integracao/test_app_streamlit.py`), apareceram dois erros
+> que nenhum teste pegava:
+>
+> 1. **O app quebrava ao abrir** (`KeyError: 'compra_habitual_...'`): a
+>    comparacao com a familia normal era serializada sem a expansao dos
+>    lotes de compra do baseline. Corrigido em `app.py`.
+> 2. **O botao "Filho celiaco" deixava o modelo inviavel**: bloqueava a tag
+>    `sem_gluten`, que nos dados significa "esta receita NAO tem gluten" — ou
+>    seja, proibia os pratos seguros. Agora `Membro.tags_exigidas` exige a
+>    tag (ver R6 em `formulacao.md`). O teste dos cinco botoes usava
+>    horizonte 3, que escondia o problema; agora usa os padroes do app
+>    (5 dias, R$ 500) e exige cardapio nao vazio.
+>
+> Medido com os padroes do app (4 pessoas, R$ 500, tempo limite 10 s):
+> horizonte 5 → cardapio em 12,4 s; horizonte 7 → 14,8 s. O app passou a
+> usar 5 dias por padrao (com um seletor de 3 a 7) e guarda as respostas em
+> cache. O card S5-06 pedia menos de 10 s por botao: o primeiro clique leva
+> ~13 s, os repetidos sao instantaneos.
 
 > ## NUMEROS REVALIDADOS (Sprint 6, rodada de 100 cenarios)
 >

@@ -42,9 +42,25 @@ def test_demo_celiaco_bloqueia_so_a_crianca() -> None:
 
     catalogo_depois = demo_filho_celiaco(catalogo, "crianca_8_anos")
 
-    assert "sem_gluten" in catalogo_depois.membros["crianca_8_anos"].tags_bloqueadas
-    assert "sem_gluten" not in catalogo_depois.membros["adulto"].tags_bloqueadas
-    assert "sem_gluten" not in catalogo_depois.membros["idoso_hipertenso"].tags_bloqueadas
+    assert "sem_gluten" in catalogo_depois.membros["crianca_8_anos"].tags_exigidas
+    assert "sem_gluten" not in catalogo_depois.membros["adulto"].tags_exigidas
+    assert "sem_gluten" not in catalogo_depois.membros["idoso_hipertenso"].tags_exigidas
+
+
+def test_celiaco_so_come_receita_marcada_sem_gluten() -> None:
+    """Regressao (Sprint 6): "sem_gluten" nos dados significa que a receita
+    NAO tem gluten. O botao bloqueava essa tag, ou seja, proibia a crianca
+    de comer exatamente os pratos seguros — e o modelo ficava inviavel."""
+    catalogo = demo_filho_celiaco(carregar_catalogo(), "crianca_8_anos")
+    crianca = catalogo.membros["crianca_8_anos"]
+    adulto = catalogo.membros["adulto_ativo"]
+
+    sem_gluten = catalogo.receitas["arroz_feijao_ovo"]  # vegetariano;sem_gluten;sem_lactose
+    com_gluten = catalogo.receitas["sanduiche_quente_queijo_tomate"]  # so vegetariano
+
+    assert crianca.pode_comer(sem_gluten)
+    assert not crianca.pode_comer(com_gluten)
+    assert adulto.pode_comer(com_gluten)
 
 
 def test_demo_orcamento_corta_trinta_por_cento() -> None:
@@ -104,11 +120,13 @@ def test_demo_afrouxar_sodio_sobe_o_teto() -> None:
 @pytest.mark.lento
 def test_todos_os_cinco_cenarios_sao_viaveis() -> None:
     """TESTE IMPORTANTE: se um botao der Infeasible na feira, a
-    demonstracao morre na frente do visitante. Catalogo real, horizonte
-    curto para o teste nao demorar demais."""
+    demonstracao morre na frente do visitante. Catalogo real e OS MESMOS
+    parametros padrao do app (5 dias, R$ 500) — com horizonte 3 o bug do
+    celiaco (Sprint 6) passava despercebido. Exige cardapio nao vazio:
+    "Not Solved" sem solucao inteira tambem mata a demo."""
     catalogo_base = carregar_catalogo()
     parametros_base = Parametros(
-        horizonte=3, refeicoes_por_dia=3, orcamento=300.0, dias_compra=(1,)
+        horizonte=5, refeicoes_por_dia=3, orcamento=500.0, dias_compra=(1,)
     )
 
     cenarios = {
@@ -128,3 +146,4 @@ def test_todos_os_cinco_cenarios_sao_viaveis() -> None:
     for nome, (catalogo, parametros) in cenarios.items():
         solucao = resolver(catalogo, parametros)
         assert solucao.status in ("Optimal", "Not Solved"), f"demo '{nome}' deu {solucao.status}"
+        assert solucao.cardapio, f"demo '{nome}' terminou sem cardapio ({solucao.status})"

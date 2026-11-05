@@ -8,16 +8,31 @@ cosmetica (ex.: porcentagem de uma barra de progresso), nunca modelo.
 """
 from __future__ import annotations
 
+import sys
 from dataclasses import replace
+from pathlib import Path
 
-import streamlit as st
+# Hospedagem (Streamlit Community Cloud): la so existe `pip install -r
+# requirements.txt`, sem o `pip install -e .` do Docker/CI. Colocar src/ no
+# sys.path faz `import nutricasa2050` funcionar nos dois casos (onde o
+# pacote ja esta instalado isto e inofensivo). Ver docs/HOSPEDAGEM.md.
+_RAIZ = Path(__file__).resolve().parent
+if str(_RAIZ / "src") not in sys.path:
+    sys.path.insert(0, str(_RAIZ / "src"))
 
-from nutricasa2050.dados.carga import carregar_catalogo
-from nutricasa2050.dominio import Catalogo, Parametros, Pesos
-from nutricasa2050.otimizacao.solver import descrever_status, resolver
-from nutricasa2050.serializacao import resultado_para_dict
-from nutricasa2050.simulacao.baselines import baseline_humano
-from nutricasa2050.simulacao.cenarios import Cenario, adicionar_visita
+import streamlit as st  # noqa: E402
+
+from nutricasa2050.analise import consultas  # noqa: E402
+from nutricasa2050.dados.carga import carregar_catalogo  # noqa: E402
+from nutricasa2050.dominio import Catalogo, Parametros, Pesos  # noqa: E402
+from nutricasa2050.otimizacao.solver import descrever_status, resolver  # noqa: E402
+from nutricasa2050.persistencia.banco import ConfiguracaoBanco, criar_engine  # noqa: E402
+from nutricasa2050.serializacao import resultado_para_dict  # noqa: E402
+from nutricasa2050.simulacao.baselines import (  # noqa: E402
+    baseline_humano,
+    catalogo_com_compra_habitual,
+)
+from nutricasa2050.simulacao.cenarios import Cenario, adicionar_visita  # noqa: E402
 
 st.set_page_config(page_title="NutriCasa 2050", page_icon="🥗", layout="wide")
 
@@ -90,6 +105,10 @@ def montar_barra_lateral(catalogo: Catalogo) -> tuple[Parametros, list[str]]:
     st.sidebar.header("Parametros")
     orcamento = st.sidebar.slider("Orcamento semanal (R$)", 50.0, 1000.0, 500.0, step=10.0)
     tempo_por_dia = st.sidebar.slider("Tempo de cozinha por dia (min)", 10, 180, 60, step=5)
+    # Padrao 5 dias, nao 7: com 7 o CBC demora mais para achar a primeira
+    # solucao inteira e, num servidor mais lento, pode estourar o tempo
+    # limite sem cardapio (S4-05 / correcao do Sprint 6).
+    horizonte = st.sidebar.select_slider("Dias planejados", options=[3, 4, 5, 6, 7], value=5)
 
     st.sidebar.header("Pesos do objetivo")
     pesos = {
@@ -104,7 +123,7 @@ def montar_barra_lateral(catalogo: Catalogo) -> tuple[Parametros, list[str]]:
     }
 
     parametros = montar_parametros(
-        orcamento=orcamento, tempo_por_dia=float(tempo_por_dia), pesos=pesos
+        orcamento=orcamento, tempo_por_dia=float(tempo_por_dia), pesos=pesos, horizonte=horizonte
     )
     return parametros, pessoas
 
@@ -297,6 +316,97 @@ def desenhar_aderencia(resultado: dict) -> None:
             )
 
 
+# ======================== Sprint 6 — cache e simulacao ========================
+
+
+@st.cache_data(show_spinner=False, max_entries=32)
+def resolver_cacheado(catalogo: Catalogo, parametros: Parametros):
+    """O Streamlit reexecuta o script a cada clique; sem cache, voltar a uma
+    configuracao ja vista custaria outros ~10 s de solver."""
+    return resolver(catalogo, parametros)
+
+
+@st.cache_data(show_spinner=False, max_entries=32)
+def baseline_cacheado(catalogo: Catalogo, parametros: Parametros):
+    return baseline_humano(catalogo, parametros)
+
+
+CAMINHO_RESULTADOS = _RAIZ / "var" / "results.db"
+
+
+def ler_resultados_da_simulacao(caminho: Path = CAMINHO_RESULTADOS) -> dict | None:
+    """Le os numeros da Monte Carlo do banco publicado junto com o app
+    (var/results.db, docs/SQLITE.md secao 6). None se o arquivo nao existe.
+    So leitura: toda conta mora em analise/consultas.py."""
+    if not caminho.exists():
+        return None
+    url = f"sqlite:///{caminho}"
+    engine = criar_engine(ConfiguracaoBanco("development", url, "sqlite:///:memory:"), url)
+    return {
+        "desperdicio": consultas.desperdicio_por_estrategia(engine),
+        "reducao": consultas.reducao_de_desperdicio(engine),
+        "economia": consultas.economia_mensal(engine),
+        "folgas": consultas.folgas_mais_frequentes(engine)[:5],
+    }
+
+
+_NOMES_ESTRATEGIA = {
+    "otimizado": "NutriCasa (otimizado)",
+    "humano": "Familia normal",
+    "guloso": "Guloso (vence-primeiro)",
+}
+
+
+def _reais(valor: float) -> str:
+    return f"R$ {valor:,.0f}".replace(",", ".")
+
+
+def desenhar_resultados_da_simulacao(dados: dict | None) -> None:
+    """Aba com os numeros da Monte Carlo (S4-06, revalidados no Sprint 6)."""
+    st.subheader("O que a simulacao mostrou")
+    if dados is None:
+        st.info(
+            "Ainda nao ha resultados publicados (var/results.db). "
+            "Rode `make resultados` e copie o banco — ver docs/HOSPEDAGEM.md."
+        )
+        return
+    media, inferior, superior = dados["economia"]
+    col1, col2 = st.columns(2)
+    col1.metric("Reducao de desperdicio vs. familia normal", f"{dados['reducao']:.1f}%")
+    col2.metric(
+        "Economia projetada por mes",
+        _reais(media),
+        help=f"Intervalo de confianca de 95%: {_reais(inferior)} a {_reais(superior)}",
+    )
+    st.markdown("**Desperdicio medio por semana, por estrategia (R$)**")
+    st.dataframe(
+        [
+            {"Estrategia": _NOMES_ESTRATEGIA.get(nome, nome), "Desperdicio (R$)": round(valor, 2)}
+            for nome, valor in sorted(dados["desperdicio"].items(), key=lambda item: item[1])
+        ],
+        hide_index=True,
+    )
+    st.caption(
+        "Ressalva honesta: a estrategia gulosa desperdica menos que o modelo, porque o "
+        "modelo aceita sobra para cumprir a dieta de cada pessoa. A vantagem do "
+        "NutriCasa e contra a familia normal e na aderencia nutricional."
+    )
+    if dados["folgas"]:
+        st.markdown("**Regras da nutricionista que a realidade mais atropela**")
+        st.dataframe(
+            [
+                {
+                    "Pessoa": folga["membro_id"],
+                    "Nutriente": folga["nutriente"],
+                    "Vezes com folga": folga["vezes_com_folga"],
+                    "Folga media": round(folga["folga_media"], 1),
+                }
+                for folga in dados["folgas"]
+            ],
+            hide_index=True,
+        )
+
+
 # ============================ S5-06 — os cinco botoes =========================
 
 
@@ -305,7 +415,7 @@ def demo_filho_celiaco(catalogo: Catalogo, crianca_id: str) -> Catalogo:
     modelo tem que achar pratos que sirvam a casa toda mesmo assim
     (R6, S3-03)."""
     membro = catalogo.membros[crianca_id]
-    novo_membro = replace(membro, tags_bloqueadas=membro.tags_bloqueadas | {"sem_gluten"})
+    novo_membro = replace(membro, tags_exigidas=membro.tags_exigidas | {"sem_gluten"})
     return replace(catalogo, membros={**catalogo.membros, crianca_id: novo_membro})
 
 
@@ -374,6 +484,14 @@ def main() -> None:
     st.title("NutriCasa 2050")
     st.caption("Planejamento semanal otimizado — sem desperdicio por acidente.")
 
+    aba_semana, aba_simulacao = st.tabs(["Planejar a semana", "Resultados da simulacao"])
+    with aba_simulacao:
+        desenhar_resultados_da_simulacao(ler_resultados_da_simulacao())
+    with aba_semana:
+        planejar_a_semana()
+
+
+def planejar_a_semana() -> None:
     catalogo_completo = carregar_catalogo_cacheado()
     parametros, pessoas = montar_barra_lateral(catalogo_completo)
     catalogo = filtrar_membros(catalogo_completo, pessoas)
@@ -383,8 +501,8 @@ def main() -> None:
         st.warning("Selecione pelo menos uma pessoa na barra lateral.")
         return
 
-    with st.spinner("Resolvendo..."):
-        solucao = resolver(catalogo, parametros)
+    with st.spinner("Resolvendo (ate ~15 s)..."):
+        solucao = resolver_cacheado(catalogo, parametros)
 
     # "Not Solved" SEM cardapio = tempo esgotado antes de achar qualquer
     # solucao inteira (solver.solucao_e_inteira); nao ha nada para mostrar.
@@ -397,8 +515,13 @@ def main() -> None:
     resultado = resultado_para_dict(solucao, catalogo, parametros)
 
     with st.spinner("Calculando o baseline de comparacao..."):
-        solucao_referencia = baseline_humano(catalogo, parametros)
-    resultado_referencia = resultado_para_dict(solucao_referencia, catalogo, parametros)
+        solucao_referencia = baseline_cacheado(catalogo, parametros)
+    # O baseline compra por um mecanismo proprio (lotes "compra_habitual_*"),
+    # que precisa da sua expansao antes de serializar — igual a Monte Carlo
+    # faz (_EXPANSAO_POR_ESTRATEGIA). Sem isto: KeyError ao abrir o app.
+    resultado_referencia = resultado_para_dict(
+        solucao_referencia, catalogo_com_compra_habitual(catalogo, parametros), parametros
+    )
 
     desenhar_numeros(resultado, resultado_referencia)
     desenhar_cardapio(resultado)

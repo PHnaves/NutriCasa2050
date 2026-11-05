@@ -7,7 +7,7 @@
 # `make resultados` para a simulacao Monte Carlo.
 # ---------------------------------------------------------------------------
 
-.PHONY: dev test lint resultados
+.PHONY: dev test lint resultados publicar-resultados
 
 # Muitas maquinas (Ubuntu, por exemplo) so tem `python3`. Sobrescreva se
 # precisar: make resultados PYTHON=python
@@ -22,9 +22,17 @@ test:
 lint:
 	ruff check src tests app.py
 
-# Card S4-04/S4-05: roda a simulacao Monte Carlo (500 cenarios por
-# padrao). NUTRICASA2050_SOLVER_TIMEOUT mais agressivo que o padrao do
-# config.py — necessario para os 500 cenarios rodarem num tempo
-# razoavel (ver docs/resultados.md, secao S4-05, para a conta completa).
+# Card S4-04, refeito no Sprint 6: a rodada que gerou os numeros oficiais
+# (100 cenarios, tempo limite 30 s, ~55 min). O antigo "500 cenarios com
+# 2 s" era invalido: com 2 s o CBC quase nunca acha solucao INTEIRA e o
+# solver agora descarta a relaxacao linear (ver docs/resultados.md, topo).
+# Mude N/TIMEOUT na linha de comando: make resultados N=500 TIMEOUT=30
+N ?= 100
+TIMEOUT ?= 30
 resultados:
-	NUTRICASA2050_SOLVER_TIMEOUT=2 PYTHONPATH=src $(PYTHON) -m nutricasa2050.simulacao.monte_carlo --n 500 --horizonte 5
+	NUTRICASA2050_SOLVER_TIMEOUT=$(TIMEOUT) PYTHONPATH=src $(PYTHON) -m nutricasa2050.simulacao.monte_carlo --n $(N) --horizonte 5 --orcamento 500
+
+# Copia o banco principal para var/results.db — o unico .db versionado,
+# lido pela aba "Resultados da simulacao" do app hospedado.
+publicar-resultados:
+	cp var/nutricasa2050.db var/results.db
