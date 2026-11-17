@@ -59,8 +59,8 @@ acrescenta **três dimensões** que o problema original não tinha:
 | f⁻, f⁺ | contínuas | folga: quanto faltou ou sobrou da faixa nutricional |
 | s⁺, s⁻ | contínuas | desvio acima e abaixo do alvo prescrito |
 
-Tamanho com o catálogo real (horizonte de 5 dias, 4 pessoas): 504 binárias,
-2016 frações, 50 inteiras e 4360 restrições.
+Tamanho com o catálogo real (semana de 7 dias, 4 pessoas): 504 binárias,
+2.016 frações e 50 inteiras. Com 5 dias, o padrão do app, são 360 binárias.
 
 ### 2.3 Objetivo
 
