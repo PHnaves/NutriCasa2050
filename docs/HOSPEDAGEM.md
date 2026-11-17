@@ -41,8 +41,8 @@ streamlit run app.py      # http://localhost:8501, as cinco páginas do menu dev
      padrão é 10 s. Os servidores gratuitos são mais lentos que um notebook,
      e 20 s reduz a chance de o tempo acabar antes de existir um cardápio.
 5. **Deploy**. O primeiro build leva alguns minutos.
-6. Cole o link no README, no lugar do aviso "ainda não há link público", e
-   no card S5-08.
+6. Link do app do projeto: <https://nutricasa2050.streamlit.app/>. Ele já está
+   no README; falta só colar no card S5-08 do Trello.
 
 ### Repositório privado
 

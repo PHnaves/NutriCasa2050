@@ -12,11 +12,11 @@ Feito em Python com programação linear inteira mista
 ([PuLP](https://coin-or.github.io/pulp/) + solver CBC), interface em
 Streamlit e resultados guardados em SQLite.
 
-> **App publicado:** o link entra aqui depois do deploy no Streamlit
-> Community Cloud. O repositório já está pronto para isso e funciona mesmo
-> com repositório privado: o passo a passo está em
+> **App publicado:** <https://nutricasa2050.streamlit.app/> (Streamlit
+> Community Cloud). O passo a passo da hospedagem está em
 > [docs/HOSPEDAGEM.md](docs/HOSPEDAGEM.md). Também dá para hospedar com a
-> imagem Docker abaixo.
+> imagem Docker abaixo. O app dorme após alguns dias sem acesso: o primeiro
+> carregamento pode levar alguns segundos.
 
 **Em números** (100 semanas simuladas, [docs/resultados.md](docs/resultados.md)):
 **64% menos desperdício** que uma família que compra sempre a mesma lista;
