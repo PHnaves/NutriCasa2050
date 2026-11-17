@@ -106,7 +106,7 @@ da faixa.
 >
 > **A e B:** NutriCasa 2050.
 
-*Na tela:* logo, link do app e do GitHub, e os nomes do grupo.
+*Na tela:* logo, link do app (nutricasa2050.streamlit.app) e do GitHub, e os nomes do grupo.
 
 ---
 
