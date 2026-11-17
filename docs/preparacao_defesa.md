@@ -24,9 +24,10 @@ humanamente inaceitável. R4 limita cada receita a 2 vezes por semana e
 proíbe dias seguintes. A medição está em `docs/resultados.md`, seção S3-04.
 
 **3. Por que otimização e não testar todas as combinações?**
-Só a decisão "cozinhar ou não" já tem 504 variáveis binárias (24 receitas ×
-5 dias × 3 refeições + …), ou seja, 2⁵⁰⁴ combinações, mais do que átomos no
-universo, antes ainda de porções e compras. O branch-and-bound do CBC
+Só a decisão "cozinhar ou não" já tem 360 variáveis binárias em 5 dias (24
+receitas × 5 dias × 3 refeições; 504 numa semana de 7 dias), ou seja, 2³⁶⁰
+combinações, um número com mais de 100 dígitos (mais do que átomos no
+universo), antes ainda de porções e compras. O branch-and-bound do CBC
 descarta regiões inteiras sem visitá-las, usando a relaxação linear como
 limite.
 

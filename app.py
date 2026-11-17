@@ -1083,7 +1083,7 @@ def pagina_problema() -> None:
             "- **o que usar primeiro** da despensa, antes que vença.\n\n"
             "Uma decisão mexe nas outras: escolher um prato muda o estoque, que muda a "
             "compra, que muda o custo. Testar tudo é impossível: só a decisão “cozinhar ou "
-            "não” já tem 2⁵⁰⁴ combinações em 5 dias. Por isso usamos **otimização**."
+            "não” já tem 2³⁶⁰ combinações em 5 dias. Por isso usamos **otimização**."
         )
 
     st.write("")
